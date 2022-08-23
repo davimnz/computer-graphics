@@ -1,2 +1,5 @@
-# computer-graphics
-Exercises for the Computer Graphics subject at Instituto Tecnológico de Aeronáutica, Brazil.
+# Computer Graphics
+
+## Setting up the web server
+After `npm install`, run ``http-server . -p 8080``.
+
