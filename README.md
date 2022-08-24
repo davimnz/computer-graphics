@@ -1,5 +1,5 @@
 # Computer Graphics
 
 ## Setting up the web server
-After `npm install`, run ``http-server . -p 8080``.
+After `npm install`, run ```npm run serve`.
 

@@ -4,7 +4,7 @@
   "description": "Exercises for the Computer Graphics subject at Instituto Tecnológico de Aeronáutica, Brazil.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "http-server ."
   },
   "repository": {
     "type": "git",
@@ -18,8 +18,6 @@
   },
   "homepage": "https://github.com/davimnz/computer-graphics#readme",
   "dependencies": {
-    "http-server": "^14.1.1",
-    "node": "^16.17.0",
-    "three": "^0.143.0"
+    "http-server": "^14.1.1"
   }
 }

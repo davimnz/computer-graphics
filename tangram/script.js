@@ -1,6 +1,8 @@
 // Create an empty scene
 var scene = new THREE.Scene();
 
+var renderer = new THREE.WebGLRenderer({ antialias: true })
+
 // Create a basic perspective camera
 var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 4;
