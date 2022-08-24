@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/davimnz/computer-graphics#readme",
   "dependencies": {
-    "http-server": "^14.1.1"
+    "http-server": "^14.1.1",
+    "three": "^0.143.0"
   }
 }
