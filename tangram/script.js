@@ -35,11 +35,17 @@ class Triangle {
         geometry.vertices.push(triangle.b);
         geometry.vertices.push(triangle.c);
         geometry.faces.push(new THREE.Face3(0, 1, 2, normal));
-        this.mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: this.color }));
+        this.triangleMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: this.color }));
     }
 
-    get getMesh() {
-        return this.mesh;
+    get mesh() {
+        return this.triangleMesh;
+    }
+
+    set position(newPosition) {
+        this.mesh.position.x = newPosition[0];
+        this.mesh.position.y = newPosition[1];
+        this.mesh.position.z = newPosition[2];
     }
 };
 
@@ -79,14 +85,24 @@ facesArray = [
     [VERTEX_G, VERTEX_F, VERTEX_D, COLOR_LIGHT_GREEN],
 ];
 
-/* Generate triangles */
+/* Generate shadow shape */
+shadowArray = [];
+facesArray.forEach((face, _) => {
+    shadowArray.push(new Triangle(face[0], face[1], face[2], COLOR_BLACK));
+});
+shadowArray.forEach((triangle, _) => scene.add(triangle.mesh));
+
+/* Generate triangles with colors */
 trianglesArray = []
 facesArray.forEach((face, _) => {
     trianglesArray.push(new Triangle(face[0], face[1], face[2], face[3]));
 });
+trianglesArray.forEach((triangle, _) => scene.add(triangle.mesh));
 
-/* Add to scene */
-trianglesArray.forEach((triangle, _) => scene.add(triangle.getMesh));
+/* Translate colored triangles to initial position */
+trianglesArray.forEach((triangle, _) => {
+    triangle.position = [-3, 0, 0];
+});
 
 /* Render Loop */
 var render = function () {
