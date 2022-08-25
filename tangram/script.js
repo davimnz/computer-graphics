@@ -43,9 +43,40 @@ class Triangle {
     }
 };
 
-/* Sample triangle */
-var testTriangle = new Triangle([1, 0, 0], [0, 1, 0], [0, 0, 0], 0xff0000);
-scene.add(testTriangle.getMesh);
+/* Face colors */
+const COLOR_RED = 0xff0505;
+const COLOR_CYAN = 0x05b8ff;
+const COLOR_BLUE = 0x0509ff;
+const COLOR_PINK = 0xff05de;
+const COLOR_VIOLET = 0x9305ff;
+const COLOR_BLACK = 0x000000;
+const COLOR_GREEN = 0x05ff15;
+const COLOR_ORANGE = 0xff8a05;
+const COLOR_YELLOW = 0xf7ff05;
+const COLOR_LIGHT_GREEN = 0x02f079;
+
+/* Triangles array */
+trianglesArray = []
+
+facesArray = [
+    [[-1 / 2, 0, 0], [-1 / 4, 1 / 2, 0], [-1 / 2, 1, 0], COLOR_RED],
+    [[0, 1 / 4, 0], [1 / 2, 0, 0], [1 / 2, 1, 0], COLOR_CYAN],
+    [[-1 / 4, 1 / 2, 0], [1 / 6, 1 / 2, 0], [0, 1, 0], COLOR_BLUE],
+    [[-1 / 4, 1 / 2, 0], [0, 1 / 4, 0], [1 / 6, 1 / 2 , 0], COLOR_PINK],
+    [[-1 / 2, 0, 0], [1 / 2, 0, 0], [0, 1 / 4, 0], COLOR_VIOLET],
+    [[-1 / 2, 0, 0], [0, - 1 / 2, 0], [1 / 2, 0, 0], COLOR_GREEN],
+    [[-1 / 4, 1 / 2, 0], [0, 1, 0], [-1 / 2, 1, 0], COLOR_ORANGE],
+    [[1 / 6, 1 / 2, 0], [1 / 2, 1, 0], [0, 1, 0], COLOR_YELLOW],
+    [[-1 / 2, 0, 0], [0, 1 / 4, 0], [-1 / 4, 1 / 2, 0], COLOR_LIGHT_GREEN],
+];
+
+/* Generate triangles */
+facesArray.forEach((face, _) => {
+    trianglesArray.push(new Triangle(face[0], face[1], face[2], face[3]));
+});
+
+/* Add to scene */
+trianglesArray.forEach((triangle, _) => scene.add(triangle.getMesh));
 
 /* Render Loop */
 var render = function () {
