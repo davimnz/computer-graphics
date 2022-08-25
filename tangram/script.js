@@ -55,22 +55,32 @@ const COLOR_ORANGE = 0xff8a05;
 const COLOR_YELLOW = 0xf7ff05;
 const COLOR_LIGHT_GREEN = 0x02f079;
 
-/* Triangles array */
-trianglesArray = []
+/* Base vertices */
+const VERTEX_A = [-1 / 2, 1, 0];
+const VERTEX_B = [0, 1, 0];
+const VERTEX_C = [1 / 2, 1, 0];
+const VERTEX_D = [-1 / 4, 1 / 2, 0];
+const VERTEX_E = [1 / 6, 1 / 2, 0];
+const VERTEX_F = [0, 1 / 4, 0];
+const VERTEX_G = [-1 / 2, 0, 0];
+const VERTEX_H = [1 / 2, 0, 0];
+const VERTEX_I = [0, -1 / 2, 0];
 
+/* Define faces */
 facesArray = [
-    [[-1 / 2, 0, 0], [-1 / 4, 1 / 2, 0], [-1 / 2, 1, 0], COLOR_RED],
-    [[0, 1 / 4, 0], [1 / 2, 0, 0], [1 / 2, 1, 0], COLOR_CYAN],
-    [[-1 / 4, 1 / 2, 0], [1 / 6, 1 / 2, 0], [0, 1, 0], COLOR_BLUE],
-    [[-1 / 4, 1 / 2, 0], [0, 1 / 4, 0], [1 / 6, 1 / 2 , 0], COLOR_PINK],
-    [[-1 / 2, 0, 0], [1 / 2, 0, 0], [0, 1 / 4, 0], COLOR_VIOLET],
-    [[-1 / 2, 0, 0], [0, - 1 / 2, 0], [1 / 2, 0, 0], COLOR_GREEN],
-    [[-1 / 4, 1 / 2, 0], [0, 1, 0], [-1 / 2, 1, 0], COLOR_ORANGE],
-    [[1 / 6, 1 / 2, 0], [1 / 2, 1, 0], [0, 1, 0], COLOR_YELLOW],
-    [[-1 / 2, 0, 0], [0, 1 / 4, 0], [-1 / 4, 1 / 2, 0], COLOR_LIGHT_GREEN],
+    [VERTEX_A, VERTEX_G, VERTEX_D, COLOR_RED],
+    [VERTEX_F, VERTEX_H, VERTEX_C, COLOR_CYAN],
+    [VERTEX_D, VERTEX_E, VERTEX_B, COLOR_BLUE],
+    [VERTEX_D, VERTEX_F, VERTEX_E, COLOR_PINK],
+    [VERTEX_G, VERTEX_H, VERTEX_F, COLOR_VIOLET],
+    [VERTEX_G, VERTEX_I, VERTEX_H, COLOR_GREEN],
+    [VERTEX_D, VERTEX_B, VERTEX_A, COLOR_ORANGE],
+    [VERTEX_E, VERTEX_C, VERTEX_B, COLOR_YELLOW],
+    [VERTEX_G, VERTEX_F, VERTEX_D, COLOR_LIGHT_GREEN],
 ];
 
 /* Generate triangles */
+trianglesArray = []
 facesArray.forEach((face, _) => {
     trianglesArray.push(new Triangle(face[0], face[1], face[2], face[3]));
 });
