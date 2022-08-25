@@ -1,5 +1,3 @@
-const THREE = require('three')
-
 // Create an empty scene
 var scene = new THREE.Scene();
 

@@ -20,5 +20,8 @@
   "dependencies": {
     "http-server": "^14.1.1",
     "three": "^0.143.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.143.1"
   }
 }
