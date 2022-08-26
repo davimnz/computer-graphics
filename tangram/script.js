@@ -162,21 +162,15 @@ window.addEventListener('mousemove', onMouseMove);
 /* Define drag function */
 function dragPolygon() {
     if (draggable != null) {
-        raycaster.setFromCamera(mouseCursorScreenFrame2D, camera);
-        const intersections = raycaster.intersectObjects(scene.children);
-        if (intersections.length > 0) {
-            var object = intersections[0].object;
-            var centerOfMassWorldFrame = new THREE.Vector3();
-            centerOfMassWorldFrame.copy(object.userData.centerOfMass);
-            centerOfMassWorldFrame.add(object.position);
-
-            var displacementVectorWorldFrame = new THREE.Vector3();
-            displacementVectorWorldFrame.copy(mousePositionWorldFrame);
-            displacementVectorWorldFrame.sub(centerOfMassWorldFrame);
-            console.log(displacementVectorWorldFrame);
-            draggable.position.x += displacementVectorWorldFrame.x;
-            draggable.position.y += displacementVectorWorldFrame.y;
-        }
+        var centerOfMassWorldFrame = new THREE.Vector3();
+        centerOfMassWorldFrame.copy(draggable.userData.centerOfMass);
+        centerOfMassWorldFrame.add(draggable.position);
+        
+        var displacementVectorWorldFrame = new THREE.Vector3();
+        displacementVectorWorldFrame.copy(mousePositionWorldFrame);
+        displacementVectorWorldFrame.sub(centerOfMassWorldFrame);
+        draggable.position.x += displacementVectorWorldFrame.x;
+        draggable.position.y += displacementVectorWorldFrame.y;
     }
 }
 
