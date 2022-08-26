@@ -43,11 +43,6 @@ class Triangle {
         }
 
         this.triangleMesh.userData.isDraggable = isDraggable
-        this.triangleMesh.userData.centerOfMass = new THREE.Vector3();
-        this.triangleMesh.userData.centerOfMass.copy(vertexOne);
-        this.triangleMesh.userData.centerOfMass.add(vertexTwo);
-        this.triangleMesh.userData.centerOfMass.add(vertexThree);
-        this.triangleMesh.userData.centerOfMass.multiplyScalar(1/3);
     }
 
     get mesh() {
@@ -183,15 +178,8 @@ window.addEventListener('mousemove', onMouseMove);
 /* Define drag function */
 function dragPolygon() {
     if (draggable != null) {
-        var centerOfMassWorldFrame = new THREE.Vector3();
-        centerOfMassWorldFrame.copy(draggable.userData.centerOfMass);
-        centerOfMassWorldFrame.add(draggable.position);
-        
-        var displacementVectorWorldFrame = new THREE.Vector3();
-        displacementVectorWorldFrame.copy(mousePositionWorldFrame);
-        displacementVectorWorldFrame.sub(centerOfMassWorldFrame);
-        draggable.position.x += displacementVectorWorldFrame.x;
-        draggable.position.y += displacementVectorWorldFrame.y;
+        draggable.position.x = mousePositionWorldFrame.x;
+        draggable.position.y = mousePositionWorldFrame.y;
     }
 }
 
