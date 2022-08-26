@@ -36,6 +36,12 @@ class Triangle {
         geometry.vertices.push(triangle.c);
         geometry.faces.push(new THREE.Face3(0, 1, 2, normal));
         this.triangleMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: this.color }));
+
+        /* Center triangles that we want to rotate */
+        if (isDraggable) {
+            geometry.center();
+        }
+
         this.triangleMesh.userData.isDraggable = isDraggable
         this.triangleMesh.userData.centerOfMass = new THREE.Vector3();
         this.triangleMesh.userData.centerOfMass.copy(vertexOne);
@@ -91,6 +97,20 @@ facesArray = [
     [VERTEX_G, VERTEX_F, VERTEX_D, COLOR_LIGHT_GREEN],
 ];
 
+/* Define draggable triangles positions */
+initialPositions = [
+    /* [displacement, rotation (rad)] */
+    [[-2, 1, 0], -2],
+    [[-3, 1, 0], 2],
+    [[-4, 1, 0], 0],
+    [[-2, 0, 0], 0.5],
+    [[-3, 0, 0], 1.5],
+    [[-4, 0, 0], -1.5],
+    [[-2, -1, 0], -1],
+    [[-3, -1, 0], -0.5],
+    [[-4, -1, 0], 1],
+]
+
 /* Generate shadow shape */
 shadowArray = [];
 facesArray.forEach((face, _) => {
@@ -105,10 +125,11 @@ facesArray.forEach((face, _) => {
 });
 trianglesArray.forEach((triangle, _) => scene.add(triangle.mesh));
 
-/* Translate colored triangles to initial position */
-trianglesArray.forEach((triangle, _) => {
-    triangle.position = [-3, 0, 0];
-});
+/* Translate and rotate colored triangles to initial position */
+for (var i = 0; i < initialPositions.length; i++) {
+    trianglesArray[i].position = initialPositions[i][0];
+    trianglesArray[i].mesh.rotateZ(initialPositions[i][1]);
+}
 
 /* Set drag and drop functions */
 var draggable = null;  /* Global draggable object */
@@ -182,7 +203,7 @@ const Z_ANGULAR_VELOCITY = 0.1;
 const onKeyPress = (event) => {
     if (event.keyCode == R_KEY) {
         if (draggable != null) {
-            draggable.rotateZ(0.1);
+            draggable.rotateZ(Z_ANGULAR_VELOCITY);
         }
     }
     else if (event.keyCode == E_KEY) {
