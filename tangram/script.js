@@ -19,7 +19,7 @@ document.body.appendChild(renderer.domElement);
 
 /* Classes definition */
 class Triangle {
-    constructor(vertexA, vertexB, vertexC, color) {
+    constructor(vertexA, vertexB, vertexC, color, isDraggable) {
         this.vertexA = vertexA
         this.vertexB = vertexB
         this.vertexC = vertexC
@@ -36,6 +36,12 @@ class Triangle {
         geometry.vertices.push(triangle.c);
         geometry.faces.push(new THREE.Face3(0, 1, 2, normal));
         this.triangleMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: this.color }));
+        this.triangleMesh.userData.isDraggable = isDraggable
+        this.triangleMesh.userData.centerOfMass = new THREE.Vector3();
+        this.triangleMesh.userData.centerOfMass.copy(vertexOne);
+        this.triangleMesh.userData.centerOfMass.add(vertexTwo);
+        this.triangleMesh.userData.centerOfMass.add(vertexThree);
+        this.triangleMesh.userData.centerOfMass.multiplyScalar(1/3);
     }
 
     get mesh() {
@@ -88,14 +94,14 @@ facesArray = [
 /* Generate shadow shape */
 shadowArray = [];
 facesArray.forEach((face, _) => {
-    shadowArray.push(new Triangle(face[0], face[1], face[2], COLOR_BLACK));
+    shadowArray.push(new Triangle(face[0], face[1], face[2], COLOR_BLACK, false));
 });
 shadowArray.forEach((triangle, _) => scene.add(triangle.mesh));
 
 /* Generate triangles with colors */
 trianglesArray = []
 facesArray.forEach((face, _) => {
-    trianglesArray.push(new Triangle(face[0], face[1], face[2], face[3]));
+    trianglesArray.push(new Triangle(face[0], face[1], face[2], face[3], true));
 });
 trianglesArray.forEach((triangle, _) => scene.add(triangle.mesh));
 
@@ -104,8 +110,79 @@ trianglesArray.forEach((triangle, _) => {
     triangle.position = [-3, 0, 0];
 });
 
+/* Set drag and drop functions */
+var draggable = null;  /* Global draggable object */
+
+const mouseCursorScreenFrame2D = new THREE.Vector2();
+const mouseCursorScreenFrame = new THREE.Vector3();
+const mouseCursorUnproject = new THREE.Vector3();
+const mousePositionWorldFrame = new THREE.Vector3();
+const clickPoint = new THREE.Vector2();
+const raycaster = new THREE.Raycaster();
+
+const onMouseClick = (event) => {
+    if (draggable != null) {
+        draggable = null;
+        return;
+    }
+
+    clickPoint.x = (event.clientX / window.innerWidth) * 2 - 1;
+    clickPoint.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(clickPoint, camera);
+    const intersections = raycaster.intersectObjects(scene.children);
+
+    /* Move closest draggable element */
+    for (var i = 0; i < intersections.length; i++) {
+        if (intersections[i].object.userData.isDraggable) {
+            draggable = intersections[i].object;
+            break;
+        }
+    }
+}
+
+const onMouseMove = (event) => {
+    mouseCursorScreenFrame.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouseCursorScreenFrame.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    mouseCursorScreenFrame.z = 0;
+
+    mouseCursorScreenFrame2D.x = mouseCursorScreenFrame.x;
+    mouseCursorScreenFrame2D.y = mouseCursorScreenFrame.y;
+    
+    mouseCursorUnproject.copy(mouseCursorScreenFrame);
+    mouseCursorUnproject.unproject(camera);
+    mouseCursorUnproject.sub(camera.position).normalize();
+    var distance = -camera.position.z / mouseCursorUnproject.z;
+    mousePositionWorldFrame.copy(camera.position).add(mouseCursorUnproject.multiplyScalar(distance));
+}
+
+window.addEventListener('click', onMouseClick);
+window.addEventListener('mousemove', onMouseMove);
+
+/* Define drag function */
+function dragPolygon() {
+    if (draggable != null) {
+        raycaster.setFromCamera(mouseCursorScreenFrame2D, camera);
+        const intersections = raycaster.intersectObjects(scene.children);
+        if (intersections.length > 0) {
+            var object = intersections[0].object;
+            var centerOfMassWorldFrame = new THREE.Vector3();
+            centerOfMassWorldFrame.copy(object.userData.centerOfMass);
+            centerOfMassWorldFrame.add(object.position);
+
+            var displacementVectorWorldFrame = new THREE.Vector3();
+            displacementVectorWorldFrame.copy(mousePositionWorldFrame);
+            displacementVectorWorldFrame.sub(centerOfMassWorldFrame);
+            console.log(displacementVectorWorldFrame);
+            draggable.position.x += displacementVectorWorldFrame.x;
+            draggable.position.y += displacementVectorWorldFrame.y;
+        }
+    }
+}
+
 /* Render Loop */
 var render = function () {
+    dragPolygon();
     requestAnimationFrame(render);
 
     /* Render the scene */
