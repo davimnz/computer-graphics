@@ -2,7 +2,7 @@
 
 ## Projects
 
-  - [Tangram Puzzle](tangram/README.md)
+  - [Tangram Puzzle](tangram)
 
 ## Setting up the web server
 
