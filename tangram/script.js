@@ -174,6 +174,26 @@ function dragPolygon() {
     }
 }
 
+/* Set rotation functions */
+const R_KEY = 114;
+const E_KEY = 101;
+const Z_ANGULAR_VELOCITY = 0.1;
+
+const onKeyPress = (event) => {
+    if (event.keyCode == R_KEY) {
+        if (draggable != null) {
+            draggable.rotateZ(0.1);
+        }
+    }
+    else if (event.keyCode == E_KEY) {
+        if (draggable != null) {
+            draggable.rotateZ(-Z_ANGULAR_VELOCITY);
+        }
+    }
+}
+
+window.addEventListener('keypress', onKeyPress);
+
 /* Render Loop */
 var render = function () {
     dragPolygon();
