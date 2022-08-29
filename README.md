@@ -1,5 +1,12 @@
 # Computer Graphics
 
+## Projects
+
+  - [Tangram Puzzle](tangram)
+
 ## Setting up the web server
-Run `python -m http.server`
+
+```
+python -m http.server
+```
 
