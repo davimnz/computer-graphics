@@ -92,7 +92,6 @@ facesArray = [
     [VERTEX_G, VERTEX_F, VERTEX_D, COLOR_LIGHT_GREEN],
 ];
 
-/* Define draggable triangles positions */
 initialPositions = [
     /* [displacement, rotation (rad)] */
     [[-2, 1, 0], -2],
@@ -205,11 +204,48 @@ window.addEventListener('keypress', onKeyPress);
 
 /* Render Loop */
 var render = function () {
+    if (draggable == null) {
+        checkEnd();
+    }
+
     dragPolygon();
     requestAnimationFrame(render);
 
     /* Render the scene */
-    renderer.render(scene, camera);
+    renderer.render(scene, camera);  
 };
+
+function checkEnd() {
+    var sum = 0
+
+    for (var i = 0; i < trianglesArray.length; i++) {
+        const triangle_pos = [
+            sumPos(trianglesArray[i].vertexA, positionToList(trianglesArray[i].mesh.position)),
+            sumPos(trianglesArray[i].vertexB, positionToList(trianglesArray[i].mesh.position)),
+            sumPos(trianglesArray[i].vertexC, positionToList(trianglesArray[i].mesh.position))
+        ]
+        const desired_pos = facesArray[i]
+        
+        sum +=  getDistance(triangle_pos[0], desired_pos[0]) +
+            getDistance(triangle_pos[1], desired_pos[1]) +
+            getDistance(triangle_pos[2], desired_pos[2])
+    }
+
+    console.log(sum)
+
+    return sum <= 2
+}
+
+function getDistance(a, b) {
+    return Math.sqrt(Math.pow((a[0] - b[0]), 2) + Math.pow((a[1] - b[1]), 2))
+}
+
+function sumPos(a, b) {
+    return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
+}
+
+function positionToList(position) {
+    return [position.x, position.y, position.z]
+}
 
 render();
