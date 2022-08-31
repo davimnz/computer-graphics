@@ -37,6 +37,9 @@ class Triangle {
         geometry.faces.push(new THREE.Face3(0, 1, 2, normal));
         this.triangleMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: this.color }));
 
+        this.centerOfMass = [(this.vertexA[0] + this.vertexB[0] + this.vertexC[0]) / 3,
+                             (this.vertexA[1] + this.vertexB[1] + this.vertexC[1]) / 3,
+                             (this.vertexA[2] + this.vertexB[2] + this.vertexC[2]) / 3];
         /* Center triangles that we want to rotate */
         if (isDraggable) {
             geometry.center();
@@ -205,7 +208,17 @@ window.addEventListener('keypress', onKeyPress);
 /* Render Loop */
 var render = function () {
     if (draggable == null) {
-        checkEnd();
+        /* Verify if game ended */
+        var isEnd = checkEnd();
+        if (isEnd) {
+            /* Show the end window */
+            var clickedButton = window.confirm("Congratulations! You just finished the game.\n Click OK to restart.");
+            if (clickedButton) {
+                /* Refresh the page */
+                console.log("Here!");
+                window.location.reload();
+            }
+        }
     }
 
     dragPolygon();
@@ -220,19 +233,19 @@ function checkEnd() {
 
     for (var i = 0; i < trianglesArray.length; i++) {
         const triangle_pos = [
-            sumPos(trianglesArray[i].vertexA, positionToList(trianglesArray[i].mesh.position)),
-            sumPos(trianglesArray[i].vertexB, positionToList(trianglesArray[i].mesh.position)),
-            sumPos(trianglesArray[i].vertexC, positionToList(trianglesArray[i].mesh.position))
+            subPos(sumPos(trianglesArray[i].vertexA, positionToList(trianglesArray[i].mesh.position)), trianglesArray[i].centerOfMass),
+            subPos(sumPos(trianglesArray[i].vertexB, positionToList(trianglesArray[i].mesh.position)), trianglesArray[i].centerOfMass),
+            subPos(sumPos(trianglesArray[i].vertexC, positionToList(trianglesArray[i].mesh.position)), trianglesArray[i].centerOfMass)
         ]
+        
         const desired_pos = facesArray[i]
         
         sum +=  getDistance(triangle_pos[0], desired_pos[0]) +
-            getDistance(triangle_pos[1], desired_pos[1]) +
-            getDistance(triangle_pos[2], desired_pos[2])
+                getDistance(triangle_pos[1], desired_pos[1]) +
+                getDistance(triangle_pos[2], desired_pos[2])
+
     }
-
     console.log(sum)
-
     return sum <= 2
 }
 
@@ -240,8 +253,12 @@ function getDistance(a, b) {
     return Math.sqrt(Math.pow((a[0] - b[0]), 2) + Math.pow((a[1] - b[1]), 2))
 }
 
+function subPos(a, b) {
+    return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+}
+
 function sumPos(a, b) {
-    return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
+    return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
 }
 
 function positionToList(position) {
