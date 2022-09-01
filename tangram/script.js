@@ -114,7 +114,7 @@ facesArray.forEach((face, _) => {
 });
 shadowArray.forEach((triangle, _) => scene.add(triangle.mesh));
 
-// /* Generate triangles with colors */
+/* Generate triangles with colors */
 trianglesArray = []
 facesArray.forEach((face, _) => {
     trianglesArray.push(new Triangle(face[0].clone(), face[1].clone(), face[2].clone(), face[3], true));
