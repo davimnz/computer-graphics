@@ -26,10 +26,7 @@ class Triangle {
         this.color = color
 
         var geometry = new THREE.Geometry();
-        var vertexOne = new THREE.Vector3(this.vertexA[0], this.vertexA[1], this.vertexA[2]);
-        var vertexTwo = new THREE.Vector3(this.vertexB[0], this.vertexB[1], this.vertexC[2]);
-        var vertexThree = new THREE.Vector3(this.vertexC[0], this.vertexC[1], this.vertexC[2]);
-        var triangle = new THREE.Triangle(vertexOne, vertexTwo, vertexThree);
+        var triangle = new THREE.Triangle(this.vertexA.clone(), this.vertexB.clone(), this.vertexC.clone());
         var normal = triangle.normal();
         geometry.vertices.push(triangle.a);
         geometry.vertices.push(triangle.b);
@@ -37,9 +34,10 @@ class Triangle {
         geometry.faces.push(new THREE.Face3(0, 1, 2, normal));
         this.triangleMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: this.color }));
 
-        this.centerOfMass = [(this.vertexA[0] + this.vertexB[0] + this.vertexC[0]) / 3,
-                             (this.vertexA[1] + this.vertexB[1] + this.vertexC[1]) / 3,
-                             (this.vertexA[2] + this.vertexB[2] + this.vertexC[2]) / 3];
+        this.centerOfMass = new THREE.Vector3().copy(this.vertexA);
+        this.centerOfMass.add(this.vertexB);
+        this.centerOfMass.add(this.vertexC);
+        this.centerOfMass.divideScalar(3);
         /* Center triangles that we want to rotate */
         if (isDraggable) {
             geometry.center();
@@ -53,9 +51,9 @@ class Triangle {
     }
 
     set position(newPosition) {
-        this.mesh.position.x = newPosition[0];
-        this.mesh.position.y = newPosition[1];
-        this.mesh.position.z = newPosition[2];
+        this.mesh.position.x = newPosition.x;
+        this.mesh.position.y = newPosition.y;
+        this.mesh.position.z = newPosition.z;
     }
 };
 
@@ -72,15 +70,15 @@ const COLOR_YELLOW = 0xf7ff05;
 const COLOR_LIGHT_GREEN = 0x02f079;
 
 /* Base vertices */
-const VERTEX_A = [-1 / 2, 1, 0];
-const VERTEX_B = [0, 1, 0];
-const VERTEX_C = [1 / 2, 1, 0];
-const VERTEX_D = [-1 / 4, 1 / 2, 0];
-const VERTEX_E = [1 / 6, 1 / 2, 0];
-const VERTEX_F = [0, 1 / 4, 0];
-const VERTEX_G = [-1 / 2, 0, 0];
-const VERTEX_H = [1 / 2, 0, 0];
-const VERTEX_I = [0, -1 / 2, 0];
+const VERTEX_A = new THREE.Vector3(-1 / 2, 1, 0);
+const VERTEX_B = new THREE.Vector3(0, 1, 0);
+const VERTEX_C = new THREE.Vector3(1 / 2, 1, 0);
+const VERTEX_D = new THREE.Vector3(-1 / 4, 1 / 2, 0);
+const VERTEX_E = new THREE.Vector3(1 / 6, 1 / 2, 0);
+const VERTEX_F = new THREE.Vector3(0, 1 / 4, 0);
+const VERTEX_G = new THREE.Vector3(-1 / 2, 0, 0);
+const VERTEX_H = new THREE.Vector3(1 / 2, 0, 0);
+const VERTEX_I = new THREE.Vector3(0, -1 / 2, 0);
 
 /* Define faces */
 facesArray = [
@@ -95,30 +93,31 @@ facesArray = [
     [VERTEX_G, VERTEX_F, VERTEX_D, COLOR_LIGHT_GREEN],
 ];
 
+/* Base positions for colored triangles */
 initialPositions = [
     /* [displacement, rotation (rad)] */
-    [[-2, 1, 0], -2],
-    [[-3, 1, 0], 2],
-    [[-4, 1, 0], 0],
-    [[-2, 0, 0], 0.5],
-    [[-3, 0, 0], 1.5],
-    [[-4, 0, 0], -1.5],
-    [[-2, -1, 0], -1],
-    [[-3, -1, 0], -0.5],
-    [[-4, -1, 0], 1],
+    [new THREE.Vector3(-2, 1, 0), -2],
+    [new THREE.Vector3(-3, 1, 0), 2],
+    [new THREE.Vector3(-4, 1, 0), 0],
+    [new THREE.Vector3(-2, 0, 0), 0.5],
+    [new THREE.Vector3(-3, 0, 0), 1.5],
+    [new THREE.Vector3(-4, 0, 0), -1.5],
+    [new THREE.Vector3(-2, -1, 0), -1],
+    [new THREE.Vector3(-3, -1, 0), -0.5],
+    [new THREE.Vector3(-4, -1, 0), 1],
 ]
 
 /* Generate shadow shape */
 shadowArray = [];
 facesArray.forEach((face, _) => {
-    shadowArray.push(new Triangle(face[0], face[1], face[2], COLOR_BLACK, false));
+    shadowArray.push(new Triangle(face[0].clone(), face[1].clone(), face[2].clone(), COLOR_BLACK, false));
 });
 shadowArray.forEach((triangle, _) => scene.add(triangle.mesh));
 
-/* Generate triangles with colors */
+// /* Generate triangles with colors */
 trianglesArray = []
 facesArray.forEach((face, _) => {
-    trianglesArray.push(new Triangle(face[0], face[1], face[2], face[3], true));
+    trianglesArray.push(new Triangle(face[0].clone(), face[1].clone(), face[2].clone(), face[3], true));
 });
 trianglesArray.forEach((triangle, _) => scene.add(triangle.mesh));
 
@@ -215,7 +214,6 @@ var render = function () {
             var clickedButton = window.confirm("Congratulations! You just finished the game.\n Click OK to restart.");
             if (clickedButton) {
                 /* Refresh the page */
-                console.log("Here!");
                 window.location.reload();
             }
         }
@@ -229,40 +227,37 @@ var render = function () {
 };
 
 function checkEnd() {
-    var sum = 0
-
+    var verticesError = 0;
+    var gameOver = false;
     for (var i = 0; i < trianglesArray.length; i++) {
-        const triangle_pos = [
-            subPos(sumPos(trianglesArray[i].vertexA, positionToList(trianglesArray[i].mesh.position)), trianglesArray[i].centerOfMass),
-            subPos(sumPos(trianglesArray[i].vertexB, positionToList(trianglesArray[i].mesh.position)), trianglesArray[i].centerOfMass),
-            subPos(sumPos(trianglesArray[i].vertexC, positionToList(trianglesArray[i].mesh.position)), trianglesArray[i].centerOfMass)
-        ]
-        
-        const desired_pos = facesArray[i]
-        
-        sum +=  getDistance(triangle_pos[0], desired_pos[0]) +
-                getDistance(triangle_pos[1], desired_pos[1]) +
-                getDistance(triangle_pos[2], desired_pos[2])
+        var meshPosition = trianglesArray[i].mesh.position;
+        var centerOfMass = trianglesArray[i].centerOfMass;
 
+        var vertexA = new THREE.Vector3().copy(trianglesArray[i].vertexA);
+        vertexA.add(meshPosition);
+        vertexA.sub(centerOfMass);
+
+        var vertexB = new THREE.Vector3().copy(trianglesArray[i].vertexB);
+        vertexB.add(meshPosition);
+        vertexB.sub(centerOfMass);
+
+        var vertexC = new THREE.Vector3().copy(trianglesArray[i].vertexC);
+        vertexC.add(meshPosition);
+        vertexC.sub(centerOfMass);
+        
+        const triangle_pos = [vertexA, vertexB, vertexC];
+        const desired_pos = facesArray[i];
+        
+        verticesError +=  triangle_pos[0].distanceTo(desired_pos[0]) +
+                          triangle_pos[1].distanceTo(desired_pos[1]) +
+                          triangle_pos[2].distanceTo(desired_pos[2]);
     }
-    console.log(sum)
-    return sum <= 2
-}
 
-function getDistance(a, b) {
-    return Math.sqrt(Math.pow((a[0] - b[0]), 2) + Math.pow((a[1] - b[1]), 2))
-}
+    if (verticesError <= 2) {
+        gameOver = true;
+    }
 
-function subPos(a, b) {
-    return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
-}
-
-function sumPos(a, b) {
-    return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
-}
-
-function positionToList(position) {
-    return [position.x, position.y, position.z]
+    return gameOver;
 }
 
 render();
