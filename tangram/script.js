@@ -44,6 +44,10 @@ class Triangle {
         }
 
         this.triangleMesh.userData.isDraggable = isDraggable
+        this.triangleMesh.userData.localVertexA = geometry.vertices[0];
+        this.triangleMesh.userData.localVertexB = geometry.vertices[1];
+        this.triangleMesh.userData.localVertexC = geometry.vertices[2];
+        this.triangleMesh.userData.centerOfMass = this.centerOfMass;
     }
 
     get mesh() {
@@ -94,17 +98,29 @@ facesArray = [
 ];
 
 /* Base positions for colored triangles */
+// initialPositions = [
+//     /* [displacement, rotation (rad)] */
+//     [new THREE.Vector3(-2, 1, 0), -2],
+//     [new THREE.Vector3(-3, 1, 0), 2],
+//     [new THREE.Vector3(-4, 1, 0), 0],
+//     [new THREE.Vector3(-2, 0, 0), 0.5],
+//     [new THREE.Vector3(-3, 0, 0), 1.5],
+//     [new THREE.Vector3(-4, 0, 0), -1.5],
+//     [new THREE.Vector3(-2, -1, 0), -1],
+//     [new THREE.Vector3(-3, -1, 0), -0.5],
+//     [new THREE.Vector3(-4, -1, 0), 1],
+// ]
 initialPositions = [
     /* [displacement, rotation (rad)] */
-    [new THREE.Vector3(-2, 1, 0), -2],
-    [new THREE.Vector3(-3, 1, 0), 2],
+    [new THREE.Vector3(-2, 1, 0), 0],
+    [new THREE.Vector3(-3, 1, 0), 0],
     [new THREE.Vector3(-4, 1, 0), 0],
-    [new THREE.Vector3(-2, 0, 0), 0.5],
-    [new THREE.Vector3(-3, 0, 0), 1.5],
-    [new THREE.Vector3(-4, 0, 0), -1.5],
-    [new THREE.Vector3(-2, -1, 0), -1],
-    [new THREE.Vector3(-3, -1, 0), -0.5],
-    [new THREE.Vector3(-4, -1, 0), 1],
+    [new THREE.Vector3(-2, 0, 0), 0],
+    [new THREE.Vector3(-3, 0, 0), 0],
+    [new THREE.Vector3(-4, 0, 0), 0],
+    [new THREE.Vector3(-2, -1, 0), 0],
+    [new THREE.Vector3(-3, -1, 0), 0],
+    [new THREE.Vector3(-4, -1, 0), 0],
 ]
 
 /* Generate shadow shape */
@@ -177,10 +193,24 @@ window.addEventListener('click', onMouseClick);
 window.addEventListener('mousemove', onMouseMove);
 
 /* Define drag function */
+function updateVerticesPosition(draggable) {
+    var vertexA = new THREE.Vector3().copy(draggable.userData.localVertexA);
+    vertexA.add(new THREE.Vector3(draggable.position.x, draggable.position.y, 0));
+    
+    var vertexB = new THREE.Vector3().copy(draggable.userData.localVertexB);
+    vertexB.add(new THREE.Vector3(draggable.position.x, draggable.position.y, 0));
+
+    var vertexC = new THREE.Vector3().copy(draggable.userData.localVertexC);
+    vertexC.add(new THREE.Vector3(draggable.position.x, draggable.position.y, 0));
+
+    // console.log(vertexA, vertexB, vertexC);
+}
+
 function dragPolygon() {
     if (draggable != null) {
         draggable.position.x = mousePositionWorldFrame.x;
         draggable.position.y = mousePositionWorldFrame.y;
+        updateVerticesPosition(draggable);
     }
 }
 
@@ -193,11 +223,19 @@ const onKeyPress = (event) => {
     if (event.keyCode == R_KEY) {
         if (draggable != null) {
             draggable.rotateZ(Z_ANGULAR_VELOCITY);
+            draggable.userData.localVertexA.applyAxisAngle(new THREE.Vector3(0, 0, 1), Z_ANGULAR_VELOCITY);
+            draggable.userData.localVertexB.applyAxisAngle(new THREE.Vector3(0, 0, 1), Z_ANGULAR_VELOCITY);
+            draggable.userData.localVertexC.applyAxisAngle(new THREE.Vector3(0, 0, 1), Z_ANGULAR_VELOCITY);
+            updateVerticesPosition(draggable);
         }
     }
     else if (event.keyCode == E_KEY) {
         if (draggable != null) {
             draggable.rotateZ(-Z_ANGULAR_VELOCITY);
+            draggable.userData.localVertexA.applyAxisAngle(new THREE.Vector3(0, 0, 1), -Z_ANGULAR_VELOCITY);
+            draggable.userData.localVertexB.applyAxisAngle(new THREE.Vector3(0, 0, 1), -Z_ANGULAR_VELOCITY);
+            draggable.userData.localVertexC.applyAxisAngle(new THREE.Vector3(0, 0, 1), -Z_ANGULAR_VELOCITY);
+            updateVerticesPosition(draggable);
         }
     }
 }
