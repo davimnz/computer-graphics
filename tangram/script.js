@@ -1,3 +1,8 @@
+/***
+ *** Basic configurations of THREE.js.
+ ***
+*/
+
 /* Create an empty scene */
 var scene = new THREE.Scene();
 
@@ -17,7 +22,12 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 /* Append Renderer to DOM */
 document.body.appendChild(renderer.domElement);
 
-/* Classes definition */
+/***
+ *** Create triangle class. Define shadow shape and colored triangles.
+ *** 
+*/
+
+/* Class definition */
 class Triangle {
     constructor(vertexA, vertexB, vertexC, color, isDraggable) {
         this.vertexA = vertexA
@@ -34,10 +44,6 @@ class Triangle {
         geometry.faces.push(new THREE.Face3(0, 1, 2, normal));
         this.triangleMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: this.color }));
 
-        this.centerOfMass = new THREE.Vector3().copy(this.vertexA);
-        this.centerOfMass.add(this.vertexB);
-        this.centerOfMass.add(this.vertexC);
-        this.centerOfMass.divideScalar(3);
         /* Center triangles that we want to rotate */
         if (isDraggable) {
             geometry.center();
@@ -116,16 +122,15 @@ facesArray = [
 
 /* Base positions for colored triangles */
 initialPositions = [
-    /* [displacement, rotation (rad)] */
-    [new THREE.Vector3(-2, 1, 0), 0],
-    [new THREE.Vector3(-3, 1, 0), 0],
-    [new THREE.Vector3(-4, 1, 0), 0],
-    [new THREE.Vector3(-2, 0, 0), 0],
-    [new THREE.Vector3(-3, 0, 0), 0],
-    [new THREE.Vector3(-4, 0, 0), 0],
-    [new THREE.Vector3(-2, -1, 0), 0],
-    [new THREE.Vector3(-3, -1, 0), 0],
-    [new THREE.Vector3(-4, -1, 0), 0],
+    new THREE.Vector3(-2, 1, 0),
+    new THREE.Vector3(-3, 1, 0),
+    new THREE.Vector3(-4, 1, 0),
+    new THREE.Vector3(-2, 0, 0),
+    new THREE.Vector3(-3, 0, 0),
+    new THREE.Vector3(-4, 0, 0),
+    new THREE.Vector3(-2, -1, 0),
+    new THREE.Vector3(-3, -1, 0),
+    new THREE.Vector3(-4, -1, 0),
 ]
 
 /* Generate shadow shape */
@@ -145,12 +150,15 @@ facesArray.forEach((face, _) => {
 });
 trianglesArray.forEach((triangle, _) => scene.add(triangle.mesh));
 
-/* Translate and rotate colored triangles to initial position */
+/* Translate colored triangles to initial position */
 for (var i = 0; i < initialPositions.length; i++) {
-    trianglesArray[i].position = initialPositions[i][0];
-    trianglesArray[i].mesh.rotateZ(initialPositions[i][1]);
-    // TODO: remember to rotate vertices
+    trianglesArray[i].position = initialPositions[i];
 }
+
+/***
+ *** Event handlers definition to select and move triangles with mouse.
+ *** 
+*/
 
 /* Set drag and drop functions */
 var draggable = null;  /* Global draggable object */
@@ -200,6 +208,11 @@ const onMouseMove = (event) => {
 
 window.addEventListener('click', onMouseClick);
 window.addEventListener('mousemove', onMouseMove);
+
+/***
+ *** Event handlers and functions to rotate selected triangles.
+ *** 
+*/
 
 /* Updates the triangle vertices position in world frame */
 function updateVerticesPosition(draggable) {
@@ -252,9 +265,11 @@ const onKeyPress = (event) => {
 window.addEventListener('keypress', onKeyPress);
 
 /*** 
- *** Functions to calculate intersection area between two convex polygons 
- ***/
+ *** Functions to calculate intersection area between two convex polygons.
+ ***
+*/
 
+/* Verify if a point is inside a polygon. Returns true or false. */
 function pointInPolygon(point, polygonVertices) {
     var counter = 0;
     var i;
@@ -281,6 +296,7 @@ function pointInPolygon(point, polygonVertices) {
     return counter % 2 !== 0;
 }
 
+/* Checks if a point is inside a line. Returns true or false. */
 function pointInsideLine(point, line) {
     return (
         line[0].x <= point.x &&
@@ -313,6 +329,7 @@ function lineSuperposition(line1, line2) {
     return points;
 }
 
+/* Returns the intersection (x, y) of two lines. */
 function lineLineIntersection(line1, line2) {
     const x1 = line1[0].x;
     const y1 = line1[0].y;
@@ -349,6 +366,7 @@ function lineLineIntersection(line1, line2) {
     return [];
 }
 
+/* Returns all intersection points between a line and a polygon. */
 function linePolygonIntersection(line, poly) {
     var intersectionPoints = [];
 
@@ -372,6 +390,7 @@ function linePolygonIntersection(line, poly) {
     return intersectionPoints;
 }
 
+/* Returns the intersection points between two polygons based on Sutherland-Hodgman algorithm. */
 function polygonIntersection(poly1, poly2) {
     var intersection = [];
 
@@ -425,6 +444,7 @@ function polygonIntersection(poly1, poly2) {
     return intersection;
 }
 
+/* Returns the area of a 2D polygon. */
 function getPolygonArea(polygon) {
     var polygon2D = []
     for (var i = 0; i < polygon.length; ++i) {
@@ -479,7 +499,11 @@ function checkEnd(triangles, shadowPolygon) {
     return end;
 }
 
-/* Render Loop */
+/*** 
+ *** Main render loop.
+ ***
+*/
+
 var render = function () {
     if (draggable == null) {
         /* Verify if the game ended */
