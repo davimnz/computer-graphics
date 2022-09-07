@@ -419,7 +419,18 @@ function polygonIntersection(poly1, poly2) {
         const inPolygon = pointInPolygon(vertice, closedPoly1);
 
         if (inPolygon) {
-            intersection.push(vertice);
+            /* Verify if vertice of Polygon 2 is not equal to vertice of Polygon 1 */
+            var equalVertices = false;
+            for (var j = 0; j < poly1.length; ++j) {
+                const distance = Math.sqrt(Math.pow((poly1[j].x - vertice.x), 2) + Math.pow((poly1[j].y - vertice.y), 2));
+                if (distance <= 0.03) {
+                    equalVertices = true;
+                }
+            }
+
+            if (!equalVertices) {
+                intersection.push(vertice);
+            }
         }
     }
 
