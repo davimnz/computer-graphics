@@ -148,7 +148,6 @@ facesArray.forEach((face, _) => {
 shadowArray.forEach((triangle, _) => scene.add(triangle.mesh));
 
 /* Store the vertices of shadow shape */
-// shadowPolygon = [VERTEX_I, VERTEX_G, VERTEX_A, VERTEX_C, VERTEX_H];
 shadowPolygon = [VERTEX_I, VERTEX_H, VERTEX_C, VERTEX_A, VERTEX_G];
 
 /* Generate triangles with colors */
@@ -478,7 +477,6 @@ function checkEnd(triangles, shadowPolygon) {
     if (filledArea >= shadowArea - epsilon) {
         end = true;
     }
-    console.log(shadowArea, filledArea, intersectionAreaBetweenTriangles);
     return end;
 }
 
