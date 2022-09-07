@@ -249,6 +249,34 @@ const onKeyPress = (event) => {
 
 window.addEventListener('keypress', onKeyPress);
 
+/* Functions to calculate intersection area between polygons */
+
+function pointInPolygon(point, polygonVertices) {
+    var counter = 0;
+    var i;
+    var intersectionX;
+    var point1, point2;
+    const numVertices = polygonVertices.length;
+
+    point1 = polygonVertices[0];
+    for (i = 1; i <= numVertices; i++) {
+        point2 = polygonVertices[i % numVertices];
+        if (point.y > Math.min(point1.y, point2.y)) {
+            if (point.y <= Math.max(point1.y, point2.y)) {
+                if (point.x <= Math.max(point1.x, point2.x)) {
+                    if (point1.y != point2.y) {
+                        intersectionX = ((point.y - point1.y) * (point2.x - point1.x)) / (point2.y - point1.y) + point1.x;
+                        if (point1.x == point2.x || point.x <= intersectionX) counter++;
+                    }
+                }
+            }
+        }
+        point1 = point2;
+    }
+
+    return counter % 2 !== 0;
+}
+
 /* Render Loop */
 var render = function () {
     if (draggable == null) {
@@ -265,6 +293,10 @@ var render = function () {
     }
 
     dragPolygon();
+    if (draggable != null) {
+        var inPolygon = pointInPolygon(draggable.userData.worldVertexA, [VERTEX_I, VERTEX_G, VERTEX_A, VERTEX_C, VERTEX_H, VERTEX_I]);
+        console.log(inPolygon);
+    }
     requestAnimationFrame(render);
 
     /* Render the scene */
