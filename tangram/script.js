@@ -115,18 +115,6 @@ facesArray = [
 ];
 
 /* Base positions for colored triangles */
-// initialPositions = [
-//     /* [displacement, rotation (rad)] */
-//     [new THREE.Vector3(-2, 1, 0), -2],
-//     [new THREE.Vector3(-3, 1, 0), 2],
-//     [new THREE.Vector3(-4, 1, 0), 0],
-//     [new THREE.Vector3(-2, 0, 0), 0.5],
-//     [new THREE.Vector3(-3, 0, 0), 1.5],
-//     [new THREE.Vector3(-4, 0, 0), -1.5],
-//     [new THREE.Vector3(-2, -1, 0), -1],
-//     [new THREE.Vector3(-3, -1, 0), -0.5],
-//     [new THREE.Vector3(-4, -1, 0), 1],
-// ]
 initialPositions = [
     /* [displacement, rotation (rad)] */
     [new THREE.Vector3(-2, 1, 0), 0],
@@ -242,7 +230,7 @@ function dragPolygon() {
 /* Set rotation functions */
 const R_KEY = 114;
 const E_KEY = 101;
-const Z_ANGULAR_VELOCITY = 0.1;
+const Z_ANGULAR_VELOCITY = 0.05;
 
 const onKeyPress = (event) => {
     if (event.keyCode == R_KEY) {
