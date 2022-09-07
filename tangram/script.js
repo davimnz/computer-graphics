@@ -203,10 +203,6 @@ function updateVerticesPosition(draggable) {
     draggable.userData.worldVertexB.add(new THREE.Vector3(draggable.position.x, draggable.position.y, 0));
     draggable.userData.worldVertexC = new THREE.Vector3().copy(draggable.userData.localVertexC);
     draggable.userData.worldVertexC.add(new THREE.Vector3(draggable.position.x, draggable.position.y, 0));
-
-    // console.log(draggable.userData.worldVertexA, 
-    //             draggable.userData.worldVertexB, 
-    //             draggable.userData.worldVertexC);
 }
 
 /* Updates the triangle vertices orientation in local frame */
@@ -249,7 +245,9 @@ const onKeyPress = (event) => {
 
 window.addEventListener('keypress', onKeyPress);
 
-/* Functions to calculate intersection area between polygons */
+/*** 
+ *** Functions to calculate intersection area between polygons 
+ ***/
 
 function pointInPolygon(point, polygonVertices) {
     var counter = 0;
@@ -277,6 +275,121 @@ function pointInPolygon(point, polygonVertices) {
     return counter % 2 !== 0;
 }
 
+function pointInsideLine(point, line) {
+    return (
+        line[0].x <= point.x &&
+        point.x <= line[1].x &&
+        line[0].y <= point.y &&
+        point.y <= line[1].y
+    );
+}
+
+function lineSuperposition(line1, line2) {
+    var points = [];
+
+    for (const v of line2) {
+        if (pointInsideLine(v, line1)) {
+            points.push(v);
+        }
+    }
+
+    if (points.length == 1) {
+        for (const v of line1) {
+            if (
+                pointInsideLine(v, line2) &&
+                !points.some((p) => p.x === v.x && p.y === v.y)
+            ) {
+                points.push(v);
+            }
+        }
+    }
+
+    return points;
+}
+
+function lineLineIntersection(line1, line2) {
+    const x1 = line1[0].x;
+    const y1 = line1[0].y;
+
+    const x2 = line1[1].x;
+    const y2 = line1[1].y;
+
+    const x3 = line2[0].x;
+    const y3 = line2[0].y;
+
+    const x4 = line2[1].x;
+    const y4 = line2[1].y;
+
+    const t1Up = (x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4);
+    const t1Down = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+
+    const t2Up = (x1 - x3) * (y1 - y2) - (y1 - y3) * (x1 - x2);
+    const t2Down = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+
+    const insideLine1 =
+        t1Down >= 0 ? 0 <= t1Up && t1Up <= t1Down : 0 >= t1Up && t1Up >= t1Down;
+    const insideLine2 =
+        t2Down >= 0 ? 0 <= t2Up && t2Up <= t2Down : 0 >= t2Up && t2Up >= t2Down;
+
+    if (insideLine1 && insideLine2) {
+        const t1 = t1Up / t1Down;
+
+        if (!t1) {
+            return lineSuperposition(line1, line2);
+        }
+        return { x: x1 + t1 * (x2 - x1), y: y1 + t1 * (y2 - y1) };
+    }
+
+    return [];
+}
+
+function linePolygonIntersection(line, poly) {
+    var intersectionPoints = [];
+
+    for (var i = 0; i < poly.length; ++i) {
+        const v1 = poly[i];
+        const v2 = poly[(i + 1) % poly.length];
+        const polyLine = [v1, v2];
+
+        const intersection = lineLineIntersection(line, polyLine);
+
+        if (intersection.length === 2) {
+            throw Error('unhandled line');
+        } else if (intersection.length === 0) {
+            continue;
+        }
+
+        if (!intersectionPoints.some(p => p.x === intersection.x && p.y === intersection.y)) {
+            intersectionPoints.push(intersection);
+        }
+    }
+    return intersectionPoints;
+}
+
+function polygonIntersection(poly1, poly2) {
+    var intersection = [];
+
+    for (var i = 0; i < poly1.length; ++i) {
+        const v1 = poly1[i];
+        const v2 = poly1[(i + 1) % poly1.length];
+
+        const v1Inside = pointInPolygon(v1, poly2);
+        const v2Inside = pointInPolygon(v2, poly2);
+
+        if (v1Inside && v2Inside) {
+            intersection.push(v2);
+        } else if (!v1Inside && v2Inside) {
+            const v1Prime = linePolygonIntersection([v1, v2], poly2)[0];
+            intersection.push(v1Prime);
+            intersection.push(v2);
+        } else if (v1Inside && !v2Inside) {
+            const v2Prime = linePolygonIntersection([v1, v2], poly2)[0];
+            intersection.push(v2Prime);
+        }
+    }
+    return intersection;
+}
+
 /* Render Loop */
 var render = function () {
     if (draggable == null) {
@@ -294,8 +407,12 @@ var render = function () {
 
     dragPolygon();
     if (draggable != null) {
-        var inPolygon = pointInPolygon(draggable.userData.worldVertexA, [VERTEX_I, VERTEX_G, VERTEX_A, VERTEX_C, VERTEX_H, VERTEX_I]);
-        console.log(inPolygon);
+        var polygon = [VERTEX_I, VERTEX_G, VERTEX_A, VERTEX_C, VERTEX_H, VERTEX_I];
+        var draggablePolygon = [draggable.userData.worldVertexA,
+                                draggable.userData.worldVertexB,
+                                draggable.userData.worldVertexC];
+        var intersections = polygonIntersection(draggablePolygon, polygon);
+        console.log(intersections);
     }
     requestAnimationFrame(render);
 
