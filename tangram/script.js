@@ -386,7 +386,26 @@ function polygonIntersection(poly1, poly2) {
             const v2Prime = linePolygonIntersection([v1, v2], poly2)[0];
             intersection.push(v2Prime);
         }
+        else if (!v1Inside && !v2Inside) {
+            const intersections = linePolygonIntersection([v1, v2], poly2);
+            if (intersections.length != 0) {
+                intersection = intersection.concat(intersections);
+            }
+        }
     }
+
+    /* Verify if some vertice of Polygon 2 is inside Polygon 1 */
+    for (var i = 0; i < poly2.length - 1; ++i) {
+        const vertice = poly2[i];
+        const closedPoly1 = poly1.concat(poly1[0]);
+        const inPolygon = pointInPolygon(vertice, closedPoly1);
+
+        if (inPolygon) {
+            intersection.push(vertice);
+        }
+    }
+
+    console.log(intersection);
     return intersection;
 }
 
@@ -395,7 +414,6 @@ function getPolygonArea(polygon) {
     for (var i = 0; i < polygon.length; ++i) {
         polygon2D.push(new THREE.Vector2(polygon[i].x, polygon[i].y));
     }
-    console.log(polygon2D);
     var area = THREE.ShapeUtils.area(polygon2D);
     return area;
 }
@@ -423,7 +441,7 @@ var render = function () {
                                 draggable.userData.worldVertexC];
         var intersections = polygonIntersection(draggablePolygon, polygon);
         var area = getPolygonArea(intersections);
-        console.log(area);
+        // console.log(area);
     }
     requestAnimationFrame(render);
 
