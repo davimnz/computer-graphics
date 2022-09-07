@@ -420,17 +420,17 @@ function polygonIntersection(poly1, poly2) {
     }
 
     /* Verify if some vertice of Polygon 2 is inside Polygon 1 */
+    const epsilon = 0.01;
     for (var i = 0; i < poly2.length - 1; ++i) {
         const vertice = poly2[i];
         const closedPoly1 = poly1.concat(poly1[0]);
         const inPolygon = pointInPolygon(vertice, closedPoly1);
 
         if (inPolygon) {
-            /* Verify if vertice of Polygon 2 is not equal to vertice of Polygon 1 */
+            /* Verify if vertice of Polygon 2 is not equal to some vertice in intersection. */
             var equalVertices = false;
-            for (var j = 0; j < poly1.length; ++j) {
-                const distance = Math.sqrt(Math.pow((poly1[j].x - vertice.x), 2) + Math.pow((poly1[j].y - vertice.y), 2));
-                if (distance <= 0.03) {
+            for (var j = 0; j < intersection.length; ++j) {
+                if (Math.abs(intersection[j].x - vertice.x) <= epsilon && Math.abs(intersection[j].y - vertice.y) <= epsilon) {
                     equalVertices = true;
                 }
             }
@@ -440,6 +440,11 @@ function polygonIntersection(poly1, poly2) {
             }
         }
     }
+
+    /* Change polygon vertices to clockwise */
+    intersection = intersection.sort(function (point1, point2) {
+        return point2.x - point1.x;
+    });
 
     return intersection;
 }
@@ -451,6 +456,10 @@ function getPolygonArea(polygon) {
         polygon2D.push(new THREE.Vector2(polygon[i].x, polygon[i].y));
     }
     var area = THREE.ShapeUtils.area(polygon2D);
+    
+    if (area <= 0) {
+        area *= -1;
+    }
     return area;
 }
 
@@ -482,20 +491,18 @@ function checkEnd(triangles, shadowPolygon) {
             const currentPoly2 = triangles[j].worldVertices;
             const intersectionPoly = polygonIntersection(currentPoly1, currentPoly2);
             var area = getPolygonArea(intersectionPoly);
-            if (area <= 0) {
-                area *= -1; 
-            }
             intersectionAreaBetweenTriangles += area;
         }
     }
     filledArea -= intersectionAreaBetweenTriangles;
 
     /* Compare total filled area with the shadow area */
-    const epsilon = 0.05;
+    const percentageFilled = filledArea / shadowArea;
     var end = false;
-    if (filledArea >= shadowArea - epsilon) {
+    if (percentageFilled >= 0.95) {
         end = true;
     }
+    console.log("Filled area (%): ", percentageFilled);
     return end;
 }
 
