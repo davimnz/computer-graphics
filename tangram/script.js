@@ -390,6 +390,16 @@ function polygonIntersection(poly1, poly2) {
     return intersection;
 }
 
+function getPolygonArea(polygon) {
+    var polygon2D = []
+    for (var i = 0; i < polygon.length; ++i) {
+        polygon2D.push(new THREE.Vector2(polygon[i].x, polygon[i].y));
+    }
+    console.log(polygon2D);
+    var area = THREE.ShapeUtils.area(polygon2D);
+    return area;
+}
+
 /* Render Loop */
 var render = function () {
     if (draggable == null) {
@@ -412,7 +422,8 @@ var render = function () {
                                 draggable.userData.worldVertexB,
                                 draggable.userData.worldVertexC];
         var intersections = polygonIntersection(draggablePolygon, polygon);
-        console.log(intersections);
+        var area = getPolygonArea(intersections);
+        console.log(area);
     }
     requestAnimationFrame(render);
 
