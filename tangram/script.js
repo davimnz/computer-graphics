@@ -47,7 +47,9 @@ class Triangle {
         this.triangleMesh.userData.localVertexA = geometry.vertices[0];
         this.triangleMesh.userData.localVertexB = geometry.vertices[1];
         this.triangleMesh.userData.localVertexC = geometry.vertices[2];
-        this.triangleMesh.userData.centerOfMass = this.centerOfMass;
+        this.triangleMesh.userData.worldVertexA = null;
+        this.triangleMesh.userData.worldVertexB = null;
+        this.triangleMesh.userData.worldVertexC = null;
     }
 
     get mesh() {
@@ -141,6 +143,7 @@ trianglesArray.forEach((triangle, _) => scene.add(triangle.mesh));
 for (var i = 0; i < initialPositions.length; i++) {
     trianglesArray[i].position = initialPositions[i][0];
     trianglesArray[i].mesh.rotateZ(initialPositions[i][1]);
+    // TODO: remember to rotate vertices
 }
 
 /* Set drag and drop functions */
@@ -192,20 +195,28 @@ const onMouseMove = (event) => {
 window.addEventListener('click', onMouseClick);
 window.addEventListener('mousemove', onMouseMove);
 
-/* Define drag function */
+/* Updates the triangle vertices position in world frame */
 function updateVerticesPosition(draggable) {
-    var vertexA = new THREE.Vector3().copy(draggable.userData.localVertexA);
-    vertexA.add(new THREE.Vector3(draggable.position.x, draggable.position.y, 0));
-    
-    var vertexB = new THREE.Vector3().copy(draggable.userData.localVertexB);
-    vertexB.add(new THREE.Vector3(draggable.position.x, draggable.position.y, 0));
+    draggable.userData.worldVertexA = new THREE.Vector3().copy(draggable.userData.localVertexA);
+    draggable.userData.worldVertexA.add(new THREE.Vector3(draggable.position.x, draggable.position.y, 0));
+    draggable.userData.worldVertexB = new THREE.Vector3().copy(draggable.userData.localVertexB);
+    draggable.userData.worldVertexB.add(new THREE.Vector3(draggable.position.x, draggable.position.y, 0));
+    draggable.userData.worldVertexC = new THREE.Vector3().copy(draggable.userData.localVertexC);
+    draggable.userData.worldVertexC.add(new THREE.Vector3(draggable.position.x, draggable.position.y, 0));
 
-    var vertexC = new THREE.Vector3().copy(draggable.userData.localVertexC);
-    vertexC.add(new THREE.Vector3(draggable.position.x, draggable.position.y, 0));
-
-    // console.log(vertexA, vertexB, vertexC);
+    // console.log(draggable.userData.worldVertexA, 
+    //             draggable.userData.worldVertexB, 
+    //             draggable.userData.worldVertexC);
 }
 
+/* Updates the triangle vertices orientation in local frame */
+function updateVerticesRotationZ(draggable, angle) {
+    draggable.userData.localVertexA.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+    draggable.userData.localVertexB.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+    draggable.userData.localVertexC.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+}
+
+/* Define drag function */
 function dragPolygon() {
     if (draggable != null) {
         draggable.position.x = mousePositionWorldFrame.x;
@@ -223,18 +234,14 @@ const onKeyPress = (event) => {
     if (event.keyCode == R_KEY) {
         if (draggable != null) {
             draggable.rotateZ(Z_ANGULAR_VELOCITY);
-            draggable.userData.localVertexA.applyAxisAngle(new THREE.Vector3(0, 0, 1), Z_ANGULAR_VELOCITY);
-            draggable.userData.localVertexB.applyAxisAngle(new THREE.Vector3(0, 0, 1), Z_ANGULAR_VELOCITY);
-            draggable.userData.localVertexC.applyAxisAngle(new THREE.Vector3(0, 0, 1), Z_ANGULAR_VELOCITY);
+            updateVerticesRotationZ(draggable, Z_ANGULAR_VELOCITY);
             updateVerticesPosition(draggable);
         }
     }
     else if (event.keyCode == E_KEY) {
         if (draggable != null) {
             draggable.rotateZ(-Z_ANGULAR_VELOCITY);
-            draggable.userData.localVertexA.applyAxisAngle(new THREE.Vector3(0, 0, 1), -Z_ANGULAR_VELOCITY);
-            draggable.userData.localVertexB.applyAxisAngle(new THREE.Vector3(0, 0, 1), -Z_ANGULAR_VELOCITY);
-            draggable.userData.localVertexC.applyAxisAngle(new THREE.Vector3(0, 0, 1), -Z_ANGULAR_VELOCITY);
+            updateVerticesRotationZ(draggable, -Z_ANGULAR_VELOCITY);
             updateVerticesPosition(draggable);
         }
     }
