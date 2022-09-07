@@ -489,7 +489,8 @@ function checkEnd(triangles, shadowPolygon) {
         const currentPoly1 = triangles[i].worldVertices;
         for (var j = i + 1; j < triangles.length; ++j) {
             const currentPoly2 = triangles[j].worldVertices;
-            const intersectionPoly = polygonIntersection(currentPoly1, currentPoly2);
+            const closedCurrentPoly2 = currentPoly2.concat(currentPoly2[0]);
+            const intersectionPoly = polygonIntersection(currentPoly1, closedCurrentPoly2);
             var area = getPolygonArea(intersectionPoly);
             intersectionAreaBetweenTriangles += area;
         }
