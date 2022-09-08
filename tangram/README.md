@@ -61,6 +61,7 @@ Finalmente, todos os casos citados estão implementados na função `polygonInte
 A verificação de fim de jogo foi realizada por meio do cálculo da porção da peça preta que se encontra coberta pelas peças coloridas. Essa verificação ocorre na função `checkEnd`, a qual é chamada uma vez no laço principal. Para o cálculo, realizou-se a soma das áreas de interseção entre cada peça colorida e a peça preta. Em seguida, subtraiu-se as áreas de interseção entre as peças coloridas a fim de não realizar a contagem de uma mesma área múltiplas vezes. Portanto, o cálculo da porção da peça preta preenchida pelas peças coloridas foi calculada conforme
 
 $$ P = \sum_{i} \frac{A(c_{i} \cap p)}{A(p)} - \sum_{i \neq j} \frac{A(c_{i} \cap c_{j})}{A(p)},$$
+
 em que $A$ representa a área de um polígono, $c_i$ representa a peça colorida de índice $i$ e $p$ representa a peça preta. Além disso, determinou-se que um jogo é finalizado quando $P \geq 0.95$.
 
 ## Possível solução
