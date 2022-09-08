@@ -8,9 +8,11 @@ Exercises for the Computer Graphics subject at ITA, Brazil.
 
 ## Projects
 
-  - [Tangram Puzzle](tangram)
+  - Tangram Puzzle
+    - [Game](tangram) 
+    - [Source code](https://github.com/davimnz/computer-graphics/tree/main/tangram)
 
-## Setting up the web server
+## Setting up the web server to run local
 
 ```
 python3 -m http.server
