@@ -1,3 +1,8 @@
+/***
+ *** Basic configurations of THREE.js.
+ ***
+*/
+
 /* Create an empty scene */
 var scene = new THREE.Scene();
 
@@ -17,7 +22,12 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 /* Append Renderer to DOM */
 document.body.appendChild(renderer.domElement);
 
-/* Classes definition */
+/***
+ *** Create triangle class. Define shadow shape and colored triangles.
+ *** 
+*/
+
+/* Class definition */
 class Triangle {
     constructor(vertexA, vertexB, vertexC, color, isDraggable) {
         this.vertexA = vertexA
@@ -34,26 +44,43 @@ class Triangle {
         geometry.faces.push(new THREE.Face3(0, 1, 2, normal));
         this.triangleMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: this.color }));
 
-        this.centerOfMass = new THREE.Vector3().copy(this.vertexA);
-        this.centerOfMass.add(this.vertexB);
-        this.centerOfMass.add(this.vertexC);
-        this.centerOfMass.divideScalar(3);
         /* Center triangles that we want to rotate */
         if (isDraggable) {
             geometry.center();
         }
 
         this.triangleMesh.userData.isDraggable = isDraggable
+        this.triangleMesh.userData.localVertexA = geometry.vertices[0];
+        this.triangleMesh.userData.localVertexB = geometry.vertices[1];
+        this.triangleMesh.userData.localVertexC = geometry.vertices[2];
+        this.triangleMesh.userData.worldVertexA = geometry.vertices[0];
+        this.triangleMesh.userData.worldVertexB = geometry.vertices[1];
+        this.triangleMesh.userData.worldVertexC = geometry.vertices[2];
     }
 
     get mesh() {
         return this.triangleMesh;
     }
 
+    get worldVertices() {
+        return [this.triangleMesh.userData.worldVertexA,
+                this.triangleMesh.userData.worldVertexB,
+                this.triangleMesh.userData.worldVertexC];
+    }
+
     set position(newPosition) {
+        /* Update mesh position */
         this.mesh.position.x = newPosition.x;
         this.mesh.position.y = newPosition.y;
         this.mesh.position.z = newPosition.z;
+
+        /* Update position of vertices in world frame */
+        this.mesh.userData.worldVertexA = new THREE.Vector3().copy(this.mesh.userData.localVertexA);
+        this.mesh.userData.worldVertexA.add(new THREE.Vector3(this.mesh.position.x, this.mesh.position.y, 0));
+        this.mesh.userData.worldVertexB = new THREE.Vector3().copy(this.mesh.userData.localVertexB);
+        this.mesh.userData.worldVertexB.add(new THREE.Vector3(this.mesh.position.x, this.mesh.position.y, 0));
+        this.mesh.userData.worldVertexC = new THREE.Vector3().copy(this.mesh.userData.localVertexC);
+        this.mesh.userData.worldVertexC.add(new THREE.Vector3(this.mesh.position.x, this.mesh.position.y, 0));
     }
 };
 
@@ -95,16 +122,15 @@ facesArray = [
 
 /* Base positions for colored triangles */
 initialPositions = [
-    /* [displacement, rotation (rad)] */
-    [new THREE.Vector3(-2, 1, 0), -2],
-    [new THREE.Vector3(-3, 1, 0), 2],
-    [new THREE.Vector3(-4, 1, 0), 0],
-    [new THREE.Vector3(-2, 0, 0), 0.5],
-    [new THREE.Vector3(-3, 0, 0), 1.5],
-    [new THREE.Vector3(-4, 0, 0), -1.5],
-    [new THREE.Vector3(-2, -1, 0), -1],
-    [new THREE.Vector3(-3, -1, 0), -0.5],
-    [new THREE.Vector3(-4, -1, 0), 1],
+    new THREE.Vector3(-2, 1, 0),
+    new THREE.Vector3(-3, 1, 0),
+    new THREE.Vector3(-4, 1, 0),
+    new THREE.Vector3(-2, 0, 0),
+    new THREE.Vector3(-3, 0, 0),
+    new THREE.Vector3(-4, 0, 0),
+    new THREE.Vector3(-2, -1, 0),
+    new THREE.Vector3(-3, -1, 0),
+    new THREE.Vector3(-4, -1, 0),
 ]
 
 /* Generate shadow shape */
@@ -114,6 +140,9 @@ facesArray.forEach((face, _) => {
 });
 shadowArray.forEach((triangle, _) => scene.add(triangle.mesh));
 
+/* Store the vertices of shadow shape */
+shadowPolygon = [VERTEX_I, VERTEX_H, VERTEX_C, VERTEX_A, VERTEX_G];
+
 /* Generate triangles with colors */
 trianglesArray = []
 facesArray.forEach((face, _) => {
@@ -121,11 +150,15 @@ facesArray.forEach((face, _) => {
 });
 trianglesArray.forEach((triangle, _) => scene.add(triangle.mesh));
 
-/* Translate and rotate colored triangles to initial position */
+/* Translate colored triangles to initial position */
 for (var i = 0; i < initialPositions.length; i++) {
-    trianglesArray[i].position = initialPositions[i][0];
-    trianglesArray[i].mesh.rotateZ(initialPositions[i][1]);
+    trianglesArray[i].position = initialPositions[i];
 }
+
+/***
+ *** Event handlers definition to select and move triangles with mouse.
+ *** 
+*/
 
 /* Set drag and drop functions */
 var draggable = null;  /* Global draggable object */
@@ -176,45 +209,319 @@ const onMouseMove = (event) => {
 window.addEventListener('click', onMouseClick);
 window.addEventListener('mousemove', onMouseMove);
 
+/***
+ *** Event handlers and functions to rotate selected triangles.
+ *** 
+*/
+
+/* Updates the triangle vertices position in world frame */
+function updateVerticesPosition(draggable) {
+    draggable.userData.worldVertexA = new THREE.Vector3().copy(draggable.userData.localVertexA);
+    draggable.userData.worldVertexA.add(new THREE.Vector3(draggable.position.x, draggable.position.y, 0));
+    draggable.userData.worldVertexB = new THREE.Vector3().copy(draggable.userData.localVertexB);
+    draggable.userData.worldVertexB.add(new THREE.Vector3(draggable.position.x, draggable.position.y, 0));
+    draggable.userData.worldVertexC = new THREE.Vector3().copy(draggable.userData.localVertexC);
+    draggable.userData.worldVertexC.add(new THREE.Vector3(draggable.position.x, draggable.position.y, 0));
+}
+
+/* Updates the triangle vertices orientation in local frame */
+function updateVerticesRotationZ(draggable, angle) {
+    draggable.userData.localVertexA.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+    draggable.userData.localVertexB.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+    draggable.userData.localVertexC.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+}
+
 /* Define drag function */
 function dragPolygon() {
     if (draggable != null) {
         draggable.position.x = mousePositionWorldFrame.x;
         draggable.position.y = mousePositionWorldFrame.y;
+        updateVerticesPosition(draggable);
     }
 }
 
 /* Set rotation functions */
 const R_KEY = 114;
 const E_KEY = 101;
-const Z_ANGULAR_VELOCITY = 0.1;
+const Z_ANGULAR_VELOCITY = 0.05;
 
 const onKeyPress = (event) => {
     if (event.keyCode == R_KEY) {
         if (draggable != null) {
             draggable.rotateZ(Z_ANGULAR_VELOCITY);
+            updateVerticesRotationZ(draggable, Z_ANGULAR_VELOCITY);
+            updateVerticesPosition(draggable);
         }
     }
     else if (event.keyCode == E_KEY) {
         if (draggable != null) {
             draggable.rotateZ(-Z_ANGULAR_VELOCITY);
+            updateVerticesRotationZ(draggable, -Z_ANGULAR_VELOCITY);
+            updateVerticesPosition(draggable);
         }
     }
 }
 
 window.addEventListener('keypress', onKeyPress);
 
-/* Render Loop */
+/*** 
+ *** Functions to calculate intersection area between two convex polygons.
+ ***
+*/
+
+/* Verify if a point is inside a polygon. Returns true or false. */
+function pointInPolygon(point, polygonVertices) {
+    var counter = 0;
+    var i;
+    var intersectionX;
+    var point1, point2;
+    const numVertices = polygonVertices.length;
+
+    point1 = polygonVertices[0];
+    for (i = 1; i <= numVertices; i++) {
+        point2 = polygonVertices[i % numVertices];
+        if (point.y > Math.min(point1.y, point2.y)) {
+            if (point.y <= Math.max(point1.y, point2.y)) {
+                if (point.x <= Math.max(point1.x, point2.x)) {
+                    if (point1.y != point2.y) {
+                        intersectionX = ((point.y - point1.y) * (point2.x - point1.x)) / (point2.y - point1.y) + point1.x;
+                        if (point1.x == point2.x || point.x <= intersectionX) counter++;
+                    }
+                }
+            }
+        }
+        point1 = point2;
+    }
+
+    return counter % 2 !== 0;
+}
+
+/* Checks if a point is inside a line. Returns true or false. */
+function pointInsideLine(point, line) {
+    return (
+        line[0].x <= point.x &&
+        point.x <= line[1].x &&
+        line[0].y <= point.y &&
+        point.y <= line[1].y
+    );
+}
+
+function lineSuperposition(line1, line2) {
+    var points = [];
+
+    for (const v of line2) {
+        if (pointInsideLine(v, line1)) {
+            points.push(v);
+        }
+    }
+
+    if (points.length == 1) {
+        for (const v of line1) {
+            if (
+                pointInsideLine(v, line2) &&
+                !points.some((p) => p.x === v.x && p.y === v.y)
+            ) {
+                points.push(v);
+            }
+        }
+    }
+
+    return points;
+}
+
+/* Returns the intersection (x, y) of two lines. */
+function lineLineIntersection(line1, line2) {
+    const x1 = line1[0].x;
+    const y1 = line1[0].y;
+
+    const x2 = line1[1].x;
+    const y2 = line1[1].y;
+
+    const x3 = line2[0].x;
+    const y3 = line2[0].y;
+
+    const x4 = line2[1].x;
+    const y4 = line2[1].y;
+
+    const t1Up = (x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4);
+    const t1Down = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+
+    const t2Up = (x1 - x3) * (y1 - y2) - (y1 - y3) * (x1 - x2);
+    const t2Down = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+
+    const insideLine1 =
+        t1Down >= 0 ? 0 <= t1Up && t1Up <= t1Down : 0 >= t1Up && t1Up >= t1Down;
+    const insideLine2 =
+        t2Down >= 0 ? 0 <= t2Up && t2Up <= t2Down : 0 >= t2Up && t2Up >= t2Down;
+
+    if (insideLine1 && insideLine2) {
+        const t1 = t1Up / t1Down;
+
+        if (!t1) {
+            return lineSuperposition(line1, line2);
+        }
+        return { x: x1 + t1 * (x2 - x1), y: y1 + t1 * (y2 - y1) };
+    }
+
+    return [];
+}
+
+/* Returns all intersection points between a line and a polygon. */
+function linePolygonIntersection(line, poly) {
+    var intersectionPoints = [];
+
+    for (var i = 0; i < poly.length; ++i) {
+        const v1 = poly[i];
+        const v2 = poly[(i + 1) % poly.length];
+        const polyLine = [v1, v2];
+
+        const intersection = lineLineIntersection(line, polyLine);
+
+        if (intersection.length === 2) {
+            throw Error('unhandled line');
+        } else if (intersection.length === 0) {
+            continue;
+        }
+
+        if (!intersectionPoints.some(p => p.x === intersection.x && p.y === intersection.y)) {
+            intersectionPoints.push(intersection);
+        }
+    }
+    return intersectionPoints;
+}
+
+/* Returns the intersection points between two polygons based on Sutherland-Hodgman algorithm. */
+function polygonIntersection(poly1, poly2) {
+    var intersection = [];
+
+    for (var i = 0; i < poly1.length; ++i) {
+        const v1 = poly1[i];
+        const v2 = poly1[(i + 1) % poly1.length];
+
+        const v1Inside = pointInPolygon(v1, poly2);
+        const v2Inside = pointInPolygon(v2, poly2);
+
+        if (v1Inside && v2Inside) {
+            intersection.push(v2);
+        } else if (!v1Inside && v2Inside) {
+            const v1Prime = linePolygonIntersection([v1, v2], poly2)[0];
+            intersection.push(v1Prime);
+            intersection.push(v2);
+        } else if (v1Inside && !v2Inside) {
+            const v2Prime = linePolygonIntersection([v1, v2], poly2)[0];
+            intersection.push(v2Prime);
+        }
+        else if (!v1Inside && !v2Inside) {
+            const intersections = linePolygonIntersection([v1, v2], poly2);
+            if (intersections.length != 0) {
+                intersection = intersection.concat(intersections);
+            }
+        }
+    }
+
+    /* Verify if some vertice of Polygon 2 is inside Polygon 1 */
+    const epsilon = 0.01;
+    for (var i = 0; i < poly2.length - 1; ++i) {
+        const vertice = poly2[i];
+        const closedPoly1 = poly1.concat(poly1[0]);
+        const inPolygon = pointInPolygon(vertice, closedPoly1);
+
+        if (inPolygon) {
+            /* Verify if vertice of Polygon 2 is not equal to some vertice in intersection. */
+            var equalVertices = false;
+            for (var j = 0; j < intersection.length; ++j) {
+                if (Math.abs(intersection[j].x - vertice.x) <= epsilon && Math.abs(intersection[j].y - vertice.y) <= epsilon) {
+                    equalVertices = true;
+                }
+            }
+
+            if (!equalVertices) {
+                intersection.push(vertice);
+            }
+        }
+    }
+
+    /* Change polygon vertices to clockwise */
+    intersection = intersection.sort(function (point1, point2) {
+        return point2.x - point1.x;
+    });
+
+    return intersection;
+}
+
+/* Returns the area of a 2D polygon. */
+function getPolygonArea(polygon) {
+    var polygon2D = []
+    for (var i = 0; i < polygon.length; ++i) {
+        polygon2D.push(new THREE.Vector2(polygon[i].x, polygon[i].y));
+    }
+    var area = THREE.ShapeUtils.area(polygon2D);
+    
+    if (area <= 0) {
+        area *= -1;
+    }
+    return area;
+}
+
+/*** 
+ *** Function to verify end of the game.
+ ***/
+
+function checkEnd(triangles, shadowPolygon) {
+    /* Area of shadow polygon */
+    const shadowArea = getPolygonArea(shadowPolygon);
+
+    /* Get closed shadow polygon to use in polygonIntersection function */
+    const closedShadowPolygon = shadowPolygon.concat(shadowPolygon[0]);
+
+    /* Calculate intersection area between triangles and shadow shape */
+    var filledArea = 0;
+    for (var i = 0; i < triangles.length; ++i) {
+        const currentPoly = triangles[i].worldVertices;
+        const intersectionPoly = polygonIntersection(currentPoly, closedShadowPolygon);
+        const area = getPolygonArea(intersectionPoly);
+        filledArea += area;
+    }
+
+    /* Subtract intersection area between any pair of colored triangles */
+    var intersectionAreaBetweenTriangles = 0;
+    for (var i = 0; i < triangles.length; ++i) {
+        const currentPoly1 = triangles[i].worldVertices;
+        for (var j = i + 1; j < triangles.length; ++j) {
+            const currentPoly2 = triangles[j].worldVertices;
+            const closedCurrentPoly2 = currentPoly2.concat(currentPoly2[0]);
+            const intersectionPoly = polygonIntersection(currentPoly1, closedCurrentPoly2);
+            var area = getPolygonArea(intersectionPoly);
+            intersectionAreaBetweenTriangles += area;
+        }
+    }
+    filledArea -= intersectionAreaBetweenTriangles;
+
+    /* Compare total filled area with the shadow area */
+    const percentageFilled = filledArea / shadowArea;
+    var end = false;
+    if (percentageFilled >= 0.95) {
+        end = true;
+    }
+    console.log("Filled area (%): ", percentageFilled);
+    return end;
+}
+
+/*** 
+ *** Main render loop.
+ ***
+*/
+
 var render = function () {
     if (draggable == null) {
-        /* Verify if game ended */
-        var isEnd = checkEnd();
+        /* Verify if the game ended */
+        var isEnd = checkEnd(trianglesArray, shadowPolygon);
         if (isEnd) {
-            /* Show the end window */
+             /* Show the end window */
             var clickedButton = window.confirm("Congratulations! You just finished the game.\n Click OK to restart.");
             if (clickedButton) {
                 /* Refresh the page */
-                window.location.reload();
+                window.location.reload(true);
             }
         }
     }
@@ -225,39 +532,5 @@ var render = function () {
     /* Render the scene */
     renderer.render(scene, camera);  
 };
-
-function checkEnd() {
-    var verticesError = 0;
-    var gameOver = false;
-    for (var i = 0; i < trianglesArray.length; i++) {
-        var meshPosition = trianglesArray[i].mesh.position;
-        var centerOfMass = trianglesArray[i].centerOfMass;
-
-        var vertexA = new THREE.Vector3().copy(trianglesArray[i].vertexA);
-        vertexA.add(meshPosition);
-        vertexA.sub(centerOfMass);
-
-        var vertexB = new THREE.Vector3().copy(trianglesArray[i].vertexB);
-        vertexB.add(meshPosition);
-        vertexB.sub(centerOfMass);
-
-        var vertexC = new THREE.Vector3().copy(trianglesArray[i].vertexC);
-        vertexC.add(meshPosition);
-        vertexC.sub(centerOfMass);
-        
-        const triangle_pos = [vertexA, vertexB, vertexC];
-        const desired_pos = facesArray[i];
-        
-        verticesError +=  triangle_pos[0].distanceTo(desired_pos[0]) +
-                          triangle_pos[1].distanceTo(desired_pos[1]) +
-                          triangle_pos[2].distanceTo(desired_pos[2]);
-    }
-
-    if (verticesError <= 2) {
-        gameOver = true;
-    }
-
-    return gameOver;
-}
 
 render();

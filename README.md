@@ -1,4 +1,10 @@
 # Computer Graphics
+Exercises for the Computer Graphics subject at ITA, Brazil.
+
+## Students
+
+  - Alvaro Tedeschi Neto (ITA, COMP-23)
+  - Davi Muniz Vasconcelos (ITA, COMP-23)
 
 ## Projects
 
@@ -7,6 +13,6 @@
 ## Setting up the web server
 
 ```
-python -m http.server
+python3 -m http.server
 ```
 
