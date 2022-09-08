@@ -65,5 +65,5 @@ em que $A$ representa a área de um polígono, $c_i$ representa a peça colorida
 
 ## Possível solução
 <p align="center">
-    <img src="tangram_solution.png" alt="Tangram Solution">
+    <img src="figures/tangram_solution.png" alt="Tangram Solution">
 </p>
