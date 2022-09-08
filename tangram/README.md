@@ -37,11 +37,11 @@ Esse caso é trivial e apenas o vértice sucessor deve ser adicionado à lista d
 
 A Figura 1 indica a orientação do polígono azul por meio das linhas amarelas auxiliares. Os vértices estão destacados de amarelo. Para esse caso, analisa-se a aresta que é seguida pela seta que entra no polígono preto. Por meio da função `pointInPolygon`, determina-se que tem-se um vértice fora do polígono e o vértice seguinte dentro do polígono. Portanto, deve-se calcular a interseção da aresta com o polígono preto e adicionar dois vértices a lista de vértices do polígono de interseção: o vértice da aresta que está dentro do polígono e o vértice de interseção determinado previamente.
 
-<figure>
-    <p align="center">
-    <img src="figures/sutherland_hodgman_example_01.png" alt="Sutherland Hodgman Example 01"><figcaption align="center"><b>Fig. 1 - Orientação dos vértices do triângulo como exemplo para o algoritmo de Sutherland-Hodgman.</b></figcaption>
-    </p>
-</figure>
+<p align="center">
+    <img src="figures/sutherland_hodgman_example_01.png" alt="Sutherland Hodgman Example 01">
+</p>
+
+<p align="center">Fig. 1 - Orientação dos vértices do triângulo como exemplo para o algoritmo de Sutherland-Hodgman.
 
 #### Caso 03 - Uma extremidade de uma aresta está fora e a outra extremidade está dentro do polígono de forma a sair do polígono.
 
@@ -51,17 +51,17 @@ Para esse caso, pode-se utilizar a Figura 1 considerando a aresta que é seguida
 
 Caso as duas extremidades de um aresta estejam fora do polígono, então existem três possibilidades: não há interseção entre a aresta e o polígono, como é observado na Figura 1, há interseções entre a aresta e o polígono, como é observado na Figura 2, ou há um vértice do polígono preto dentro do polígono azul, como é observado na Figura 3. A primeira possibilidade é trivial e não há nada a fazer. A segunda possibilidade basta utilizar a função `linePolygonIntersection` e obter todos os vértices de interseção com essa aresta. Para a terceira possibilidade, deve-se verificar se existe algum vértice do polígono preto dentro do polígono azul e, caso exista, esse vértice deve ser adicionado à lista de vértices do polígono de interseção.
 
-<figure>
-    <p align="center">
-    <img src="figures/sutherland_hodgman_example_02.png" alt="Sutherland Hodgman Example 02"><figcaption align="center"><b>Fig. 2 - Caso em que dois vértices do polígono azul estão fora do polígono preto, mas interceptam o polígono.</b></figcaption>
-    </p>
-</figure>
+<p align="center">
+    <img src="figures/sutherland_hodgman_example_02.png" alt="Sutherland Hodgman Example 02">
+</p>
 
-<figure>
-    <p align="center">
-    <img src="figures/sutherland_hodgman_example_03.png" alt="Sutherland Hodgman Example 03"><figcaption align="center"><b>Fig. 3 - Caso em que uma aresta do polígono azul não intercepta o polígono preto.</b></figcaption>
-    </p>
-</figure>
+<p align="center">Fig. 2 - Caso em que dois vértices do polígono azul estão fora do polígono preto, mas interceptam o polígono.
+
+<p align="center">
+    <img src="figures/sutherland_hodgman_example_03.png" alt="Sutherland Hodgman Example 03">
+</p>
+
+<p align="center">Fig. 3 - Caso em que uma aresta do polígono azul não intercepta o polígono preto.
 
 Finalmente, todos os casos citados estão implementados na função `polygonIntersection`, a qual retorna a lista de vértices do polígono de interseção entre dois polígonos quaisquer. Por fim, para calcular a área do polígono resultante da interseção, foi usado a função `THREE.ShapeUtils.area` disponível no THREE.js.
 
@@ -73,8 +73,9 @@ $$ P = \sum_{i} \frac{A(c_{i} \cap p)}{A(p)} - \sum_{i \neq j} \frac{A(c_{i} \ca
 em que $A$ representa a área de um polígono, $c_i$ representa a peça colorida de índice $i$ e $p$ representa a peça preta. Além disso, determinou-se que um jogo é finalizado quando $P \geq 0.95$.
 
 ## Possível solução
-<figure>
-    <p align="center">
-    <img src="figures/tangram_solution.png" alt="Tangram Solution"><figcaption align="center"><b>Fig. 4 - Solução do Tangram Puzzle.</b></figcaption>
-    </p>
-</figure>
+
+<p align="center">
+    <img src="figures/tangram_solution.png" alt="Tangram Solution">
+</p>
+
+<p align="center">Fig. 4 - Solução do Tangram Puzzle.
