@@ -453,6 +453,10 @@ function polygonIntersection(poly1, poly2) {
 function getPolygonArea(polygon) {
     var polygon2D = []
     for (var i = 0; i < polygon.length; ++i) {
+        if (typeof polygon[i] === "undefined") {
+            continue;
+        }
+
         polygon2D.push(new THREE.Vector2(polygon[i].x, polygon[i].y));
     }
     var area = THREE.ShapeUtils.area(polygon2D);
