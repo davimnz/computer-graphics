@@ -105,3 +105,6 @@ dist
 
 # Virtualenv
 env
+
+# VSCode
+.vscode
