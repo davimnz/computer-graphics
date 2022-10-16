@@ -5,6 +5,12 @@
   - Alvaro Tedeschi Neto (ITA, COMP-23)
   - Davi Muniz Vasconcelos (ITA, COMP-23)
 
+## Código
+
+  - [Notebook Jupyter](radiosity.ipynb)
+
+Os dados de fator de forma estão na pasta [pickle](data/pickle/). Eles são carregados no Python com o uso da biblioteca `pickle`.
+
 ## Objetivo
 O trabalho consistiu em calcular os novos valores de cor RGB de uma cena com a presença de uma fonte de luz. Para isso, foi utilizado o modelo de iluminação que computa as interreflexões entre os objetos de uma cena. Dessa forma, é necessário calcular o valor da energia radiante $\mathbf{B}$ segundo
 
