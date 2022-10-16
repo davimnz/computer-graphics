@@ -7,27 +7,11 @@
 
 ## Objetivo
 O trabalho consistiu em calcular os novos valores de cor RGB de uma cena com a presença de uma fonte de luz. Para isso, foi utilizado o modelo de iluminação que computa as interreflexões entre os objetos de uma cena. Dessa forma, é necessário calcular o valor da energia radiante $\mathbf{B}$ segundo
-$$
-\begin{bmatrix} 
-1 - \rho_{1} F_{1,1} & - \rho_{1} F_{1,2} & \cdots & - \rho_{1} F_{1, n} \\
-- \rho_{2} F_{2,1} & 1 - \rho_{2} F_{2, 2} & \cdots & - \rho_{2} F_{2, n} \\
-\cdots & \cdots & \cdots & \cdots \\
-- \rho_{n} F_{n,1} & - \rho_{n} F_{n, 2} & \cdots & 1 - \rho_{n} F_{n, n} \\
-\end{bmatrix}
-\begin{bmatrix}
-B_1 \\
-B_2 \\
-\cdots \\
-B_n
-\end{bmatrix}
-=
-\begin{bmatrix}
-E_1 \\
-E_2 \\
-\cdots \\
-E_n
-\end{bmatrix},
-$$
+
+<p align="center">
+    <img src="figures/eq-radiosity.png" alt="Radiosity">
+</p>
+
 em que $p_{i}$ representa a cor natural do objeto $i$, $F_{i,j}$ representa o fator de forma da face $i$ e da face $j$, $E_{i}$ representa o quanto a face $i$ emite naturalmente e $B_{i}$ representa a energia radiante da face $i$.
 
 ## Cena
@@ -40,31 +24,20 @@ Para realizar a extração dos dados de vértice, de orientação das faces e de
 
 ### Checagem de uma terceira face entre duas faces
 A fim de calcular o fator de forma entre as faces, é necessário verificar se existe uma terceira face que impede que as duas faces em questão consigam se ver. Assim, verificou-se se existe uma terceira face que intercepta a linha que liga os centróides das duas faces. Para isso, é preciso resolver o sistema linear que define a interseção entre a linha dos centróides e o triângulo da terceira face de acordo com
-$$
-\begin{bmatrix}
-x_b - x_c & x_a - x_c & x_{c_2} - x_{c_1} \\
-y_b - y_c & y_a - y_c & y_{c_2} - y_{c_1} \\
-z_b - z_c & z_a - z_c & z_{c_2} - z_{c_1}
-\end{bmatrix}
-\begin{bmatrix}
-u \\
-v \\
-t \\
-\end{bmatrix}
-=
-\begin{bmatrix}
-x_{c_2} - x_c \\
-y_{c_2} - y_c \\
-z_{c_2} - z_c \\
-\end{bmatrix},
-$$
+
+<p align="center">
+    <img src="figures/eq-intersection.png" alt="Intersection">
+</p>
+
 em que $a$, $b$ e $c$ representam os vértices da terceira face, $c_1$ representa o centróide da primeira face e $c_2$ representa o centróide da segunda face. É dito que existe uma solução válida (i.e., existe interseção entre a terceira face e a linha entre os centróides) quando $u, v, t \in [0, 1]$ e $u + v \in [0, 1]$. Caso contrário, a terceira face não está entre as duas faces em questão. Portanto, dada duas faces $i$ e $j$, verificou-se se todas as demais faces estão entre a face $i$ e a face $j$.
 
 ### Cálculo do fator de forma
 A operação do cálculo de fator de forma é uma operação custosa computacionalmente. Então, foi necessário realizar uma aproximação da expressão exata do fator de forma. Para isso, utilizou-se a equação
-$$
-F_{i,j} = \frac{A_j \cos{\theta_i} \cos{\theta_j}}{\pi r^{2}},
-$$
+
+<p align="center">
+    <img src="figures/eq-view-factor.png" alt="View Factor">
+</p>
+
 em que $A_j$ é a área da face $j$, $\theta_i$ é o ângulo entre a linha que conecta os centróides das faces $i$ e $j$ e o vetor normal $\mathbf{n}_i$ da face $i$, $\theta_j$ é o ângulo entre a linha que conecta os centróides das faces $i$ e $j$ e o vetor normal $\mathbf{n}_j$ da face $j$ e $r$ é distância entre os centróides da face $i$ e da face $j$. Na prática, considerou-se que cada face triangular representa uma porção $dA$ de área.
 
 Além disso, o fator de forma é calculado pela expressão anterior apenas se as duas faces se enxergam, ou seja, não existe uma terceira face entre a linha que conecta os dois centróides e as normais da face fazem um ângulo maior de $90 \degree$ com a linha que conecta os dois centróides. Para o cálculo das normais da face, foi usado a operação de produto vetorial a partir das coordenadas dos trẽs vértices. 
