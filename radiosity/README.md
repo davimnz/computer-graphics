@@ -15,7 +15,11 @@ O trabalho consistiu em calcular os novos valores de cor RGB de uma cena com a p
 em que $p_{i}$ representa a cor natural do objeto $i$, $F_{i,j}$ representa o fator de forma da face $i$ e da face $j$, $E_{i}$ representa o quanto a face $i$ emite naturalmente e $B_{i}$ representa a energia radiante da face $i$.
 
 ## Cena
-Com o uso do Software Blender, foi possível gerar a cena para calcular a sua iluminação.
+Com o uso do Software Blender, foi possível gerar a cena para calcular a sua iluminação. O cubo em cima do teto será a fonte de luz.
+
+<p align="center">
+    <img src="figures/scene.png" alt="Scene">
+</p>
 
 ## Implementação
 
