@@ -12,6 +12,10 @@ Exercises for the Computer Graphics subject at ITA, Brazil.
     - [Game](https://davimnz.github.io/computer-graphics/tangram/)
     - [Source code](https://github.com/davimnz/computer-graphics/tree/main/tangram)
 
+  - Radiosity
+    - [Report](radiosity/)
+    - [Source code](radiosity/radiosity.ipynb)
+
 ## Setting up the web server to run local
 
 ```
