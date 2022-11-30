@@ -6,11 +6,22 @@
 /* Create an empty scene */
 var scene = new THREE.Scene();
 
-/* Create a renderer */
-var renderer = new THREE.WebGLRenderer({ antialias: true });
+/* Create a light */
+const light = new THREE.SpotLight()
+light.position.set(5, 5, 0)
+scene.add(light)
 
 /* Create a basic perspective camera */
-var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(
+    75, 
+    window.innerWidth / window.innerHeight,
+    0.1, 
+    1000);
+    
+camera.position.z = 2;
+
+/* Create a renderer */
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 
 /* Configure renderer clear color */
 renderer.setClearColor("#000000");
@@ -22,9 +33,9 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 /* Load gltf files */
-const loader = new THREE.GLTFLoader();
+const spaceship = new THREE.GLTFLoader();
 
-loader.load(
+spaceship.load(
     '/gltf/spaceship.gltf',
     function ( gltf ) {
         scene.add( gltf.scene );
