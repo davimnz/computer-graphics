@@ -7,9 +7,8 @@
 var scene = new THREE.Scene();
 
 /* Create a light */
-const light = new THREE.SpotLight()
-light.position.set(5, 5, 0)
-scene.add(light)
+const light = new THREE.HemisphereLight(0xffffbb, 0x080820, 20);
+scene.add(light);
 
 /* Create a basic perspective camera */
 const camera = new THREE.PerspectiveCamera(
@@ -18,7 +17,7 @@ const camera = new THREE.PerspectiveCamera(
     0.1, 
     1000);
     
-camera.position.z = 2;
+camera.position.z = 5;
 
 /* Create a renderer */
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -33,15 +32,15 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 /* Load gltf files */
-const spaceship = new THREE.GLTFLoader();
+var loader = new THREE.GLTFLoader();
+var spaceship;
 
-spaceship.load(
+loader.load(
     '/gltf/spaceship.gltf',
     function ( gltf ) {
         scene.add( gltf.scene );
-
+        spaceship = gltf.scene;
         gltf.animations;
-        gltf.scene;
         gltf.scenes;
         gltf.cameras;
         gltf.asset;
@@ -55,6 +54,24 @@ spaceship.load(
         console.log('An error happened');
     }
 )
+
+const R_KEY = 114;
+const E_KEY = 101;
+
+var x = 0;
+
+const onKeyPress = (event) => {
+    if (event.keyCode == R_KEY) {
+        x -= 0.1;
+        spaceship.position.set(x, 0, 0);
+    }
+    else if (event.keyCode == E_KEY) {
+        x += 0.1;
+        spaceship.position.set(x, 0, 0);
+    }
+}
+
+window.addEventListener('keypress', onKeyPress);
 
 var render = function() {
     requestAnimationFrame(render);
