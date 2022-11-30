@@ -12,9 +12,13 @@ async function main() {
         window.innerWidth / window.innerHeight,
         0.1,
         1000);
-
     camera.position.z = 5;
 
+    const cameraSpaceship = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000);
     /* Create a renderer */
     const renderer = new THREE.WebGLRenderer({ antialias: true });
 
@@ -55,7 +59,7 @@ async function main() {
         false,            // aClockwise
         0                 // aRotation
     );
-    const totalPoints = 100;
+    const totalPoints = 1000;
     let ellipsePoints = ellipseCurve.getPoints(totalPoints);
     ellipsePoints.forEach(p => { p.z = -p.y; p.y = 0 });
     const ellipseGeometry = new THREE.BufferGeometry().setFromPoints(ellipsePoints);
@@ -68,18 +72,48 @@ async function main() {
     }
     
     let posIdx = 0;
-    function updateSpaceshipPos() {
+    function updatePos() {
         posIdx = (posIdx + 1) % totalPoints;
         SetSceneObjectPos(spaceship.scene, ellipsePoints[posIdx]);
+        cameraSpaceship.position.copy(new THREE.Vector3(ellipsePoints[posIdx].x,
+                                                        ellipsePoints[posIdx].y,
+                                                        ellipsePoints[posIdx].z)).add(new THREE.Vector3(0, 0.05, 0.4));
     }
+
+    const R_KEY = 114;
+    const EnumCameraMode = {
+        SPACESHIP: 0,
+        GLOBAL: 1,
+    };
+    let CameraMode = EnumCameraMode.SPACESHIP;
+    const onKeyPress = (event) => {
+        if (event.keyCode == R_KEY) {
+            if (spaceship) {
+                if (CameraMode === EnumCameraMode.SPACESHIP)
+                    CameraMode = EnumCameraMode.GLOBAL;
+                else
+                    CameraMode = EnumCameraMode.SPACESHIP;
+            }
+        }
+    }
+    window.addEventListener('keypress', onKeyPress);
 
     var render = function () {
         requestAnimationFrame(render);
         mouseControls.update();
         if (spaceship) {
-            updateSpaceshipPos();  
+            updatePos();
         }
-        renderer.render(scene, camera);
+        switch(CameraMode) {
+            case EnumCameraMode.SPACESHIP:
+                renderer.render(scene, cameraSpaceship);
+                break;
+            case EnumCameraMode.GLOBAL:
+                renderer.render(scene, camera);
+                break;
+            default:
+                break;
+        }
     }
 
     render();
