@@ -16,6 +16,10 @@ Exercises for the Computer Graphics subject at ITA, Brazil.
     - [Report](radiosity/)
     - [Source code](radiosity/radiosity.ipynb)
 
+  - Space Travel
+    - [Visualization](https://davimnz.github.io/computer-graphics/space-travel/)
+    - [Source code](space-travel/)
+
 ## Setting up the web server to run local
 
 ```
