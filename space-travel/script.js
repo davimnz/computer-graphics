@@ -185,7 +185,6 @@ async function main() {
 
     function updateMeteors() {
         numFrames++
-        console.log(numFrames)
         if (numFrames == 200) {
                 meteors = meteors.map(m => {
                     if (m.distPassed >= m.distance) {
