@@ -3,7 +3,7 @@ async function main() {
     var scene = new THREE.Scene();
 
     /* Create a light */
-    const light = new THREE.HemisphereLight(0xffffbb, 0x080820, 10);
+    const light = new THREE.HemisphereLight(0xffffbb, 0x080820, 5);
     scene.add(light);
 
     /* Create a basic perspective camera */
