@@ -3,7 +3,7 @@ async function main() {
     var scene = new THREE.Scene();
 
     /* Create a light */
-    const light = new THREE.HemisphereLight(0xffffbb, 0x080820, 20);
+    const light = new THREE.HemisphereLight(0xffffbb, 0x080820, 10);
     scene.add(light);
 
     /* Create a basic perspective camera */
@@ -75,8 +75,12 @@ async function main() {
         sceneObj.position.set(pos.x, pos.y, pos.z);
     }
    
+    function SetSceneObjectLookAt(sceneObj, look) {
+        sceneObj.lookAt(look.x, look.y, look.z);
+    }
+
     function SetSceneObjectRot(sceneObj, rot) {
-        sceneObj.lookAt(rot.x, rot.y, rot.z);
+        sceneObj.rotation.set(rot.x, rot.y, rot.z);
     }
     
     let posIdx = 0;
@@ -84,7 +88,7 @@ async function main() {
         posIdx = (posIdx + 1) % totalPoints;
         posIdxNext = (posIdx + 1) % totalPoints;
         SetSceneObjectPos(spaceship.scene, ellipsePoints[posIdx]);
-        SetSceneObjectRot(spaceship.scene, ellipsePoints[posIdxNext]);
+        SetSceneObjectLookAt(spaceship.scene, ellipsePoints[posIdxNext]);
         cameraSpaceship.position.copy(new THREE.Vector3(ellipsePoints[posIdx].x,
                                                         ellipsePoints[posIdx].y,
                                                         ellipsePoints[posIdx].z)).add(new THREE.Vector3(0, 0.05, 0.4));
@@ -116,11 +120,22 @@ async function main() {
     }
     window.addEventListener('keypress', onKeyPress);
 
+    let planetRot = new THREE.Vector3(0, 0, 0);
+    let planetOmega = 0.005;
+    let planetTheta = 0;
     var render = function () {
         requestAnimationFrame(render);
         mouseControls.update();
         if (spaceship) {
             updatePos();
+        }
+        if (planet) {
+            planetTheta += planetOmega;
+            if (planetTheta >= 2*Math.PI) {
+                planetTheta = 2*Math.PI - planetTheta;
+            }
+            planetRot.add(new THREE.Vector3(planetOmega, planetOmega, 0.5*planetOmega));
+            SetSceneObjectRot(planet.scene, planetRot);
         }
         switch(CameraMode) {
             case EnumCameraMode.SPACESHIP:
