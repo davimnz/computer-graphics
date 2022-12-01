@@ -45,13 +45,17 @@ async function main() {
 
     let spaceship;
     let planet;
+    let asteroid;
     async function loadGLTF() {
-        spaceship = await loader.loadAsync('/gltf/spaceship.gltf', undefined);
-        planet = await loader.loadAsync('/gltf/planet.gltf', undefined);
+        spaceship = await loader.loadAsync('./gltf/spaceship.gltf', undefined);
+        planet = await loader.loadAsync('./gltf/planet.gltf', undefined);
+        asteroid = await loader.loadAsync('./gltf/asteroid.gltf', undefined);
         scene.add(spaceship.scene);
         scene.add(planet.scene);
+        scene.add(asteroid.scene);
         ResizeSceneObject(spaceship.scene, 0.05);
         ResizeSceneObject(planet.scene, 1);
+        ResizeSceneObject(asteroid.scene, 0.3);
     }
     loadGLTF();
 
@@ -71,6 +75,22 @@ async function main() {
     const ellipse = new THREE.Line(ellipseGeometry, ellipseMaterial);
     let drawEllipse = false;
 
+    /* Asteroid's trajectory */
+    const asteroidCurve = new THREE.EllipseCurve(
+        -2, 2,
+        5, 5,
+        0, 2 * Math.PI,
+        false,
+        0
+    );
+    const asteroidCurveTotalPoints = 1000;
+    let asteroidPoints = asteroidCurve.getPoints(asteroidCurveTotalPoints);
+    asteroidPoints.forEach(p => { p.z = -0.3*p.y + 0.5*p.x; });
+    const asteroidGeometry = new THREE.BufferGeometry().setFromPoints(asteroidPoints);
+    const asteroidMaterial = new THREE.LineBasicMaterial({ color: "white" });
+    const asteroidEllipse = new THREE.Line(asteroidGeometry, asteroidMaterial);
+    scene.add(asteroidEllipse);
+
     function SetSceneObjectPos(sceneObj, pos) {
         sceneObj.position.set(pos.x, pos.y, pos.z);
     }
@@ -89,6 +109,7 @@ async function main() {
         posIdxNext = (posIdx + 1) % totalPoints;
         SetSceneObjectPos(spaceship.scene, ellipsePoints[posIdx]);
         SetSceneObjectLookAt(spaceship.scene, ellipsePoints[posIdxNext]);
+        SetSceneObjectPos(asteroid.scene, asteroidPoints[posIdx]);
         cameraSpaceship.position.copy(new THREE.Vector3(ellipsePoints[posIdx].x,
                                                         ellipsePoints[posIdx].y,
                                                         ellipsePoints[posIdx].z)).add(new THREE.Vector3(0, 0.05, 0.4));
@@ -127,7 +148,9 @@ async function main() {
         requestAnimationFrame(render);
         mouseControls.update();
         if (spaceship) {
-            updatePos();
+            if (asteroid) {
+                updatePos();
+            }
         }
         if (planet) {
             planetTheta += planetOmega;
