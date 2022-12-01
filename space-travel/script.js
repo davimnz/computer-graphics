@@ -44,10 +44,14 @@ async function main() {
     }
 
     let spaceship;
+    let planet;
     async function loadGLTF() {
         spaceship = await loader.loadAsync('/gltf/spaceship.gltf', undefined);
+        planet = await loader.loadAsync('/gltf/planet.gltf', undefined);
         scene.add(spaceship.scene);
+        scene.add(planet.scene);
         ResizeSceneObject(spaceship.scene, 0.05);
+        ResizeSceneObject(planet.scene, 1);
     }
     loadGLTF();
 
