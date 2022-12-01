@@ -54,10 +54,10 @@ async function main() {
     /* Spaceship's trajectory */
     const ellipseCurve = new THREE.EllipseCurve(
         0, 0,            // ax, aY
-        5, 2,           // xRadius, yRadius
+        5, 2,            // xRadius, yRadius
         0, 2 * Math.PI,  // aStartAngle, aEndAngle
-        false,            // aClockwise
-        0                 // aRotation
+        false,           // aClockwise
+        0                // aRotation
     );
     const totalPoints = 1000;
     let ellipsePoints = ellipseCurve.getPoints(totalPoints);
@@ -65,7 +65,7 @@ async function main() {
     const ellipseGeometry = new THREE.BufferGeometry().setFromPoints(ellipsePoints);
     const ellipseMaterial = new THREE.LineBasicMaterial({ color: "white" });
     const ellipse = new THREE.Line(ellipseGeometry, ellipseMaterial);
-    scene.add(ellipse);
+    let drawEllipse = false;
 
     function SetSceneObjectPos(sceneObj, pos) {
         sceneObj.position.set(pos.x, pos.y, pos.z);
@@ -87,19 +87,27 @@ async function main() {
     }
 
     const R_KEY = 114;
+    const E_KEY = 101;
     const EnumCameraMode = {
         SPACESHIP: 0,
         GLOBAL: 1,
     };
     let CameraMode = EnumCameraMode.SPACESHIP;
     const onKeyPress = (event) => {
-        if (event.keyCode == R_KEY) {
+        if (event.keyCode === R_KEY) {
             if (spaceship) {
                 if (CameraMode === EnumCameraMode.SPACESHIP)
                     CameraMode = EnumCameraMode.GLOBAL;
                 else
                     CameraMode = EnumCameraMode.SPACESHIP;
             }
+        }
+        if (event.keyCode === E_KEY) {
+            drawEllipse = !drawEllipse;
+            if (drawEllipse)
+                scene.add(ellipse);
+            else
+                scene.remove(ellipse);
         }
     }
     window.addEventListener('keypress', onKeyPress);
