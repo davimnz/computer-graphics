@@ -62,17 +62,6 @@ async function main() {
     const totalPoints = 1000;
     let ellipsePoints = ellipseCurve.getPoints(totalPoints);
     ellipsePoints.forEach(p => { p.z = -p.y; p.y = 0 });
-    let curveTangent = [];
-    for (let i = 0; i < totalPoints - 1; ++i) {
-        let diffX = ellipsePoints[i + 1].x - ellipsePoints[i].x;
-        let diffY = ellipsePoints[i + 1].y - ellipsePoints[i].y;
-        let diffZ = ellipsePoints[i + 1].z - ellipsePoints[i].z;
-        let diff = new THREE.Vector3(diffX, diffY, diffZ);
-        let angleX = diff.angleTo(new THREE.Vector3(1, 0, 0));
-        let angleY = diff.angleTo(new THREE.Vector3(0, 1, 0));
-        let angleZ = diff.angleTo(new THREE.Vector3(0, 0, 1));
-        curveTangent.push(new THREE.Vector3(angleX, angleY, angleZ));
-    }
     const ellipseGeometry = new THREE.BufferGeometry().setFromPoints(ellipsePoints);
     const ellipseMaterial = new THREE.LineBasicMaterial({ color: "white" });
     const ellipse = new THREE.Line(ellipseGeometry, ellipseMaterial);
@@ -83,14 +72,15 @@ async function main() {
     }
    
     function SetSceneObjectRot(sceneObj, rot) {
-        sceneObj.rotation.set(rot.x, rot.y, 0);
+        sceneObj.lookAt(rot.x, rot.y, rot.z);
     }
     
     let posIdx = 0;
     function updatePos() {
         posIdx = (posIdx + 1) % totalPoints;
+        posIdxNext = (posIdx + 1) % totalPoints;
         SetSceneObjectPos(spaceship.scene, ellipsePoints[posIdx]);
-        SetSceneObjectRot(spaceship.scene, curveTangent[posIdx]);
+        SetSceneObjectRot(spaceship.scene, ellipsePoints[posIdxNext]);
         cameraSpaceship.position.copy(new THREE.Vector3(ellipsePoints[posIdx].x,
                                                         ellipsePoints[posIdx].y,
                                                         ellipsePoints[posIdx].z)).add(new THREE.Vector3(0, 0.05, 0.4));
