@@ -138,7 +138,7 @@ async function main() {
 
 
     function addMeteor() {
-        const geometry = new THREE.SphereGeometry(THREE.MathUtils.randFloat(.3, 1), 24, 24)
+        const geometry = new THREE.SphereGeometry(THREE.MathUtils.randFloat(.1, .6), 24, 24)
         const material = new THREE.MeshStandardMaterial({ color: 0xa61804 })
         const meteor = new THREE.Mesh(geometry, material)
 
@@ -177,18 +177,19 @@ async function main() {
             distance: distance,
             speed: THREE.MathUtils.randFloat(0.3, 1)
         }
-        }
+    }
 
-        var meteors = Array(5).fill().map(addMeteor)
+    var meteors = Array(5).fill().map(addMeteor)
 
-        var numFrames = 0
+    var numFrames = 0
 
-        function updateMeteors() {
+    function updateMeteors() {
         numFrames++
-        if (numFrames == 500) {
-            meteors.map(m => {
-                if (m.distPassed >= m.distance) {
-                    m.meteor.removeFromParent()
+        console.log(numFrames)
+        if (numFrames == 200) {
+                meteors = meteors.map(m => {
+                    if (m.distPassed >= m.distance) {
+                    scene.remove(m.meteor)
                     return addMeteor()
                 }
                 return m
@@ -201,12 +202,11 @@ async function main() {
             .copy(m.startingPosition)
             .addScaledVector(
                 m.direction,
-                THREE.MathUtils.clamp(m.distPassed, 0, 10000)
+                m.distPassed
             )
             return m
         })
-        }
-
+    }
 
     let planetRot = new THREE.Vector3(0, 0, 0);
     let planetOmega = 0.005;
