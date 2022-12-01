@@ -136,6 +136,78 @@ async function main() {
 
     Array(1000).fill().forEach(addStar)
 
+
+    function addMeteor() {
+        const geometry = new THREE.SphereGeometry(THREE.MathUtils.randFloat(.3, 1), 24, 24)
+        const material = new THREE.MeshStandardMaterial({ color: 0xa61804 })
+        const meteor = new THREE.Mesh(geometry, material)
+
+        var [x1, y1, z1] = Array(3)
+            .fill()
+            .map(() => THREE.MathUtils.randFloatSpread(1))
+        var p1 = new THREE.Vector3(x1, y1, z1)
+        p1.normalize()
+
+        var startingPosition = p1.addScaledVector(
+            p1,
+            THREE.MathUtils.randFloatSpread(200) + 300
+        )
+        meteor.position.copy(startingPosition)
+        scene.add(meteor)
+
+        var [x2, y2, z2] = Array(3)
+            .fill()
+            .map(() => THREE.MathUtils.randFloatSpread(1))
+        var p2 = new THREE.Vector3(x2, y2, z2)
+        p2.normalize()
+
+        var passPosition = p2.addScaledVector(p2, 10)
+
+        var direction = new THREE.Vector3().subVectors(passPosition, p1)
+        var distance = direction.length() * 2
+        direction.normalize()
+
+        var distPassed = 0
+
+        return {
+            meteor: meteor,
+            startingPosition: startingPosition,
+            direction: direction,
+            distPassed: distPassed,
+            distance: distance,
+            speed: THREE.MathUtils.randFloat(0.3, 1)
+        }
+        }
+
+        var meteors = Array(5).fill().map(addMeteor)
+
+        var numFrames = 0
+
+        function updateMeteors() {
+        numFrames++
+        if (numFrames == 500) {
+            meteors.map(m => {
+                if (m.distPassed >= m.distance) {
+                    m.meteor.removeFromParent()
+                    return addMeteor()
+                }
+                return m
+            })
+            numFrames = 0
+        }
+        meteors = meteors.map((m) => {
+            m.distPassed += m.speed
+            m.meteor.position
+            .copy(m.startingPosition)
+            .addScaledVector(
+                m.direction,
+                THREE.MathUtils.clamp(m.distPassed, 0, 10000)
+            )
+            return m
+        })
+        }
+
+
     let planetRot = new THREE.Vector3(0, 0, 0);
     let planetOmega = 0.005;
     let planetTheta = 0;
@@ -153,6 +225,7 @@ async function main() {
             planetRot.add(new THREE.Vector3(planetOmega, planetOmega, 0.5*planetOmega));
             SetSceneObjectRot(planet.scene, planetRot);
         }
+        updateMeteors()
         switch(CameraMode) {
             case EnumCameraMode.SPACESHIP:
                 renderer.render(scene, cameraSpaceship);
