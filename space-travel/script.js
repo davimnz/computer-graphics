@@ -120,6 +120,22 @@ async function main() {
     }
     window.addEventListener('keypress', onKeyPress);
 
+
+    function addStar() {
+        const geometry = new THREE.SphereGeometry(0.3, 24, 24)
+        const material = new THREE.MeshStandardMaterial({ color: 0xffffff })
+        const star = new THREE.Mesh(geometry, material)
+
+        const [x, y, z] = Array(3)
+        .fill()
+        .map(() => THREE.MathUtils.randFloatSpread(500))
+
+        star.position.set(x, y, z)
+        scene.add(star)
+    }
+
+    Array(1000).fill().forEach(addStar)
+
     let planetRot = new THREE.Vector3(0, 0, 0);
     let planetOmega = 0.005;
     let planetTheta = 0;
