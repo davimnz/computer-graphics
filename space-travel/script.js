@@ -3,7 +3,7 @@ async function main() {
     var scene = new THREE.Scene();
 
     /* Create a light */
-    const light = new THREE.HemisphereLight(0xffffbb, 0x080820, 10);
+    const light = new THREE.HemisphereLight(0xffffbb, 0x080820, 5);
     scene.add(light);
 
     /* Create a basic perspective camera */
@@ -120,6 +120,20 @@ async function main() {
     }
     window.addEventListener('keypress', onKeyPress);
 
+    function addPlanet() {
+        const geometry = new THREE.SphereGeometry(THREE.MathUtils.randFloat(4, 10), 24, 24)
+        const material = new THREE.MeshStandardMaterial({ color: '#'+(Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0') })
+        const planet = new THREE.Mesh(geometry, material)
+
+        const [x, y, z] = Array(3)
+        .fill()
+        .map(() => THREE.MathUtils.randFloatSpread(500))
+
+        planet.position.set(x, y, z)
+        scene.add(planet)
+    }
+
+    Array(30).fill().forEach(addPlanet)
 
     function addStar() {
         const geometry = new THREE.SphereGeometry(0.3, 24, 24)
